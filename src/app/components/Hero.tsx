@@ -130,6 +130,7 @@ export default function Hero({ onNavigate }: HeroProps) {
             <div className="absolute inset-10 rounded-[50px] bg-[#A855F7]/40 blur-[70px]" />
 
             <div className="relative overflow-hidden rounded-[48px] border border-white/20 bg-gradient-to-br from-[#7C3AED] via-[#5B21B6] to-[#2E1065] p-5 shadow-[0_30px_100px_rgba(0,0,0,0.45)]">
+              {/* قم بتغيير مسار الصورة هنا إلى اسم ملف الصورة الجديد عند الحاجة */}
               <img
                 src="/almaydan-logo.png"
                 alt="الميدان يا حميدان"
