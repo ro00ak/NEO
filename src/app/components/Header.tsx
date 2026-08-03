@@ -108,7 +108,7 @@ export default function Header({
                   value={item.code}
                   className="bg-[#222858] text-white"
                 >
-                  {item.code} — {item.name}
+                  {item.flag} {item.code} — {item.name}
                 </option>
               ))}
             </select>
@@ -280,7 +280,7 @@ export default function Header({
                   value={item.code}
                   className="bg-[#272C60]"
                 >
-                  {item.name} — {item.symbol}
+                  {item.flag} {item.code} — {item.name}
                 </option>
               ))}
             </select>
