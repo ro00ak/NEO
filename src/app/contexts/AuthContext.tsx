@@ -10,6 +10,18 @@ import { supabase } from '../../utils/supabase';
 
 export type UserRole = 'admin' | 'user';
 
+export interface GameEntitlement {
+  packageType:
+    | 'none'
+    | 'one-game'
+    | 'two-games'
+    | 'five-games'
+    | 'eight-games'
+    | 'full-game';
+  gamesRemaining: number;
+  unlimited: boolean;
+}
+
 export interface AppUser {
   id: string;
   email: string;
@@ -17,9 +29,25 @@ export interface AppUser {
   role: UserRole;
 }
 
+interface ConsumeGameResult {
+  success: boolean;
+  code?: 'login_required' | 'no_games' | string;
+  message?: string;
+  unlimited?: boolean;
+  gamesRemaining?: number | null;
+}
+
+interface CreatePurchaseResult {
+  success: boolean;
+  purchaseId?: string;
+  error?: string;
+}
+
 interface AuthContextType {
   user: AppUser | null;
+  entitlement: GameEntitlement;
   loading: boolean;
+  entitlementLoading: boolean;
   login: (
     email: string,
     password: string,
@@ -30,8 +58,20 @@ interface AuthContextType {
     password: string,
   ) => Promise<AppUser | null>;
   logout: () => Promise<void>;
+  refreshEntitlement: () => Promise<void>;
+  consumeGame: () => Promise<ConsumeGameResult>;
+  createPackagePurchase: (
+    packageId: string,
+    amountOmr: number,
+  ) => Promise<CreatePurchaseResult>;
   isAdmin: boolean;
 }
+
+const emptyEntitlement: GameEntitlement = {
+  packageType: 'none',
+  gamesRemaining: 0,
+  unlimited: false,
+};
 
 const AuthContext = createContext<AuthContextType | undefined>(
   undefined,
@@ -45,7 +85,11 @@ export function AuthProvider({
   children,
 }: AuthProviderProps) {
   const [user, setUser] = useState<AppUser | null>(null);
+  const [entitlement, setEntitlement] =
+    useState<GameEntitlement>(emptyEntitlement);
   const [loading, setLoading] = useState(true);
+  const [entitlementLoading, setEntitlementLoading] =
+    useState(false);
 
   const getProfile = async (
     userId: string,
@@ -74,6 +118,60 @@ export function AuthProvider({
     };
   };
 
+  const getEntitlement = async (
+    userId: string,
+    role: UserRole,
+  ): Promise<GameEntitlement> => {
+    if (role === 'admin') {
+      return {
+        packageType: 'full-game',
+        gamesRemaining: 0,
+        unlimited: true,
+      };
+    }
+
+    const { data, error } = await supabase
+      .from('game_entitlements')
+      .select('package_type, games_remaining, unlimited')
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    if (error) {
+      console.error('Entitlement fetch error:', error);
+      return emptyEntitlement;
+    }
+
+    return {
+      packageType:
+        (data?.package_type as GameEntitlement['packageType']) ||
+        'none',
+      gamesRemaining: Number(data?.games_remaining || 0),
+      unlimited: Boolean(data?.unlimited),
+    };
+  };
+
+  const loadCurrentUser = async (
+    userId: string,
+    email: string,
+    metadataName?: string,
+  ) => {
+    const currentUser = await getProfile(
+      userId,
+      email,
+      metadataName,
+    );
+
+    const currentEntitlement = await getEntitlement(
+      userId,
+      currentUser.role,
+    );
+
+    setUser(currentUser);
+    setEntitlement(currentEntitlement);
+
+    return currentUser;
+  };
+
   useEffect(() => {
     let isMounted = true;
 
@@ -84,24 +182,22 @@ export function AuthProvider({
         data: { session },
       } = await supabase.auth.getSession();
 
-      if (!isMounted) {
-        return;
-      }
+      if (!isMounted) return;
 
       if (!session?.user) {
         setUser(null);
+        setEntitlement(emptyEntitlement);
         setLoading(false);
         return;
       }
 
-      const currentUser = await getProfile(
+      await loadCurrentUser(
         session.user.id,
         session.user.email || '',
         session.user.user_metadata?.full_name,
       );
 
       if (isMounted) {
-        setUser(currentUser);
         setLoading(false);
       }
     };
@@ -113,19 +209,19 @@ export function AuthProvider({
     } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!session?.user) {
         setUser(null);
+        setEntitlement(emptyEntitlement);
         setLoading(false);
         return;
       }
 
       setTimeout(async () => {
-        const currentUser = await getProfile(
+        await loadCurrentUser(
           session.user.id,
           session.user.email || '',
           session.user.user_metadata?.full_name,
         );
 
         if (isMounted) {
-          setUser(currentUser);
           setLoading(false);
         }
       }, 0);
@@ -136,6 +232,109 @@ export function AuthProvider({
       subscription.unsubscribe();
     };
   }, []);
+
+  const refreshEntitlement = async () => {
+    if (!user) {
+      setEntitlement(emptyEntitlement);
+      return;
+    }
+
+    setEntitlementLoading(true);
+
+    const currentEntitlement = await getEntitlement(
+      user.id,
+      user.role,
+    );
+
+    setEntitlement(currentEntitlement);
+    setEntitlementLoading(false);
+  };
+
+  const consumeGame = async (): Promise<ConsumeGameResult> => {
+    if (!user) {
+      return {
+        success: false,
+        code: 'login_required',
+        message: 'يجب تسجيل الدخول أولًا',
+      };
+    }
+
+    const { data, error } = await supabase.rpc('consume_game');
+
+    if (error) {
+      console.error('Consume game error:', error);
+
+      return {
+        success: false,
+        message: 'تعذر بدء اللعبة، حاول مرة أخرى.',
+      };
+    }
+
+    const result = data as {
+      success?: boolean;
+      code?: string;
+      message?: string;
+      unlimited?: boolean;
+      games_remaining?: number | null;
+    };
+
+    if (result.success) {
+      setEntitlement((current) => ({
+        ...current,
+        unlimited:
+          result.unlimited ?? current.unlimited,
+        gamesRemaining:
+          typeof result.games_remaining === 'number'
+            ? result.games_remaining
+            : current.gamesRemaining,
+      }));
+    }
+
+    return {
+      success: Boolean(result.success),
+      code: result.code,
+      message: result.message,
+      unlimited: result.unlimited,
+      gamesRemaining: result.games_remaining,
+    };
+  };
+
+  const createPackagePurchase = async (
+    packageId: string,
+    amountOmr: number,
+  ): Promise<CreatePurchaseResult> => {
+    if (!user) {
+      return {
+        success: false,
+        error: 'يجب تسجيل الدخول أولًا',
+      };
+    }
+
+    const { data, error } = await supabase
+      .from('package_purchases')
+      .insert({
+        user_id: user.id,
+        package_id: packageId,
+        amount_omr: amountOmr,
+        status: 'pending',
+      })
+      .select('id')
+      .single();
+
+    if (error) {
+      console.error('Create package purchase error:', error);
+
+      return {
+        success: false,
+        error: 'تعذر إنشاء طلب الشراء.',
+      };
+    }
+
+    return {
+      success: true,
+      purchaseId: data.id,
+    };
+  };
 
   const login = async (
     email: string,
@@ -152,15 +351,11 @@ export function AuthProvider({
       return null;
     }
 
-    const currentUser = await getProfile(
+    return loadCurrentUser(
       data.user.id,
       data.user.email || '',
       data.user.user_metadata?.full_name,
     );
-
-    setUser(currentUser);
-
-    return currentUser;
   };
 
   const register = async (
@@ -182,16 +377,12 @@ export function AuthProvider({
       },
     });
 
-    console.log('Supabase signup response:', response);
-
     if (response.error) {
       throw new Error(response.error.message);
     }
 
     if (!response.data.user) {
-      throw new Error(
-        `لم يُرجع Supabase مستخدمًا: ${JSON.stringify(response.data)}`,
-      );
+      throw new Error('لم يُرجع Supabase مستخدمًا.');
     }
 
     const newUser: AppUser = {
@@ -203,6 +394,8 @@ export function AuthProvider({
 
     if (response.data.session) {
       setUser(newUser);
+      setEntitlement(emptyEntitlement);
+      await refreshEntitlement();
     }
 
     return newUser;
@@ -217,16 +410,22 @@ export function AuthProvider({
     }
 
     setUser(null);
+    setEntitlement(emptyEntitlement);
   };
 
   return (
     <AuthContext.Provider
       value={{
         user,
+        entitlement,
         loading,
+        entitlementLoading,
         login,
         register,
         logout,
+        refreshEntitlement,
+        consumeGame,
+        createPackagePurchase,
         isAdmin: user?.role === 'admin',
       }}
     >
