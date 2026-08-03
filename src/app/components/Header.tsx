@@ -26,10 +26,6 @@ const navigationItems = [
     label: 'طريقة اللعب',
     page: 'how',
   },
-  {
-    label: 'وسائل المساعدة',
-    page: 'helpers-info',
-  },
 ];
 
 export default function Header({
@@ -61,43 +57,72 @@ export default function Header({
   return (
     <header
       dir="rtl"
-      className="fixed inset-x-0 top-0 z-50 border-b border-[#5962B7]/35 bg-[#080A10]/95 px-4 py-3 text-white backdrop-blur-xl"
+      className="fixed inset-x-0 top-0 z-50 bg-transparent px-4 pt-5 text-white"
     >
-      <div className="mx-auto flex max-w-[1250px] items-center justify-between rounded-[20px] border-[3px] border-[#4A5397] bg-[#0C0E15] px-4 py-2 shadow-[7px_8px_0_rgba(48,54,112,0.55)] lg:px-6">
+      <div
+        className="
+          relative mx-auto flex max-w-[1250px] items-center justify-between
+          rounded-[22px] border-2 border-[#5964BD]
+          bg-gradient-to-b from-[#111522] to-[#090B12]
+          px-4 py-3
+          shadow-[0_8px_0_#2A326E,0_18px_35px_rgba(0,0,0,0.45),inset_0_1px_0_rgba(255,255,255,0.12)]
+          lg:px-6
+        "
+      >
+        <div className="pointer-events-none absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+
         {/* اللوجو */}
         <button
           type="button"
           onClick={() => navigate('home')}
-          className="flex shrink-0 items-center"
+          className="flex shrink-0 items-center transition hover:scale-105"
           aria-label="الصفحة الرئيسية"
         >
           <img
-            src="/almaydan-logo.png?v=6"
+            src="/almaydan-logo.png?v=7"
             alt="الميدان يا حميدان"
             className="h-12 w-auto object-contain sm:h-14"
           />
         </button>
 
         {/* روابط الكمبيوتر */}
-        <nav className="hidden items-center gap-2 lg:flex">
+        <nav className="hidden items-center gap-3 lg:flex">
           {navigationItems.map((item) => (
             <button
               key={item.page}
               type="button"
               onClick={() => navigate(item.page)}
-              className="rounded-full border-2 border-[#5862AE] bg-[#272C60] px-5 py-2 text-sm font-black transition hover:-translate-y-0.5 hover:border-[#FACC15] hover:bg-[#323975]"
+              className="
+                rounded-full border-2 border-[#5964BD]
+                bg-gradient-to-b from-[#303873] to-[#222858]
+                px-5 py-2 text-sm font-black
+                shadow-[0_4px_0_#151A3D,inset_0_1px_0_rgba(255,255,255,0.2)]
+                transition
+                hover:-translate-y-1
+                hover:border-[#FACC15]
+                hover:from-[#3A4385]
+                hover:to-[#293166]
+              "
             >
               {item.label}
             </button>
           ))}
         </nav>
 
-        {/* الحساب وتسجيل الدخول */}
-        <div className="hidden items-center gap-2 lg:flex">
+        {/* الحساب */}
+        <div className="hidden items-center gap-3 lg:flex">
           <button
             type="button"
             onClick={openAccount}
-            className="flex h-11 w-12 items-center justify-center rounded-full border-2 border-[#5862AE] bg-[#272C60] transition hover:border-[#FACC15] hover:bg-[#323975]"
+            className="
+              flex h-11 w-12 items-center justify-center
+              rounded-full border-2 border-[#5964BD]
+              bg-gradient-to-b from-[#303873] to-[#222858]
+              shadow-[0_4px_0_#151A3D,inset_0_1px_0_rgba(255,255,255,0.2)]
+              transition
+              hover:-translate-y-1
+              hover:border-[#FACC15]
+            "
             aria-label={user ? 'حسابي' : 'الحساب'}
           >
             <UserRound className="h-5 w-5" />
@@ -107,7 +132,15 @@ export default function Header({
             <button
               type="button"
               onClick={() => navigate('login')}
-              className="inline-flex h-11 items-center gap-3 rounded-2xl border-2 border-[#FF4E5A] bg-[#EF3340] px-6 font-black text-white shadow-[inset_0_-4px_0_rgba(130,0,15,0.25)] transition hover:-translate-y-0.5 hover:bg-[#FF4452]"
+              className="
+                inline-flex h-11 items-center gap-3
+                rounded-2xl border-2 border-[#FF5966]
+                bg-gradient-to-b from-[#FF4B59] to-[#D92334]
+                px-6 font-black text-white
+                shadow-[0_5px_0_#8F1020,inset_0_1px_0_rgba(255,255,255,0.25)]
+                transition
+                hover:-translate-y-1
+              "
             >
               <LogIn className="h-5 w-5" />
               تسجيل الدخول
@@ -116,7 +149,15 @@ export default function Header({
             <button
               type="button"
               onClick={openAccount}
-              className="inline-flex h-11 max-w-48 items-center gap-3 rounded-2xl border-2 border-[#FACC15] bg-[#FACC15] px-5 font-black text-[#211047] transition hover:-translate-y-0.5"
+              className="
+                inline-flex h-11 max-w-48 items-center gap-3
+                rounded-2xl border-2 border-[#FFE36A]
+                bg-gradient-to-b from-[#FFD83D] to-[#F4B800]
+                px-5 font-black text-[#211047]
+                shadow-[0_5px_0_#9C7000,inset_0_1px_0_rgba(255,255,255,0.4)]
+                transition
+                hover:-translate-y-1
+              "
             >
               <UserRound className="h-5 w-5" />
 
@@ -127,13 +168,19 @@ export default function Header({
           )}
         </div>
 
-        {/* زر قائمة الجوال */}
+        {/* زر الجوال */}
         <button
           type="button"
           onClick={() =>
             setMobileMenuOpen((current) => !current)
           }
-          className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/15 bg-white/10 lg:hidden"
+          className="
+            flex h-11 w-11 items-center justify-center
+            rounded-xl border-2 border-[#5964BD]
+            bg-gradient-to-b from-[#303873] to-[#222858]
+            shadow-[0_4px_0_#151A3D]
+            lg:hidden
+          "
           aria-label="فتح القائمة"
         >
           {mobileMenuOpen ? (
@@ -146,27 +193,48 @@ export default function Header({
 
       {/* قائمة الجوال */}
       {mobileMenuOpen && (
-        <div className="mx-auto mt-3 max-w-[1250px] rounded-[24px] border-2 border-[#4A5397] bg-[#0C0E15] p-4 shadow-2xl lg:hidden">
-          <nav className="grid gap-2">
+        <div
+          className="
+            mx-auto mt-4 max-w-[1250px]
+            rounded-[24px] border-2 border-[#5964BD]
+            bg-gradient-to-b from-[#111522] to-[#090B12]
+            p-4
+            shadow-[0_8px_0_#2A326E,0_20px_40px_rgba(0,0,0,0.5)]
+            lg:hidden
+          "
+        >
+          <nav className="grid gap-3">
             {navigationItems.map((item) => (
               <button
                 key={item.page}
                 type="button"
                 onClick={() => navigate(item.page)}
-                className="rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-right font-black transition hover:border-[#FACC15]/50 hover:bg-white/10"
+                className="
+                  rounded-2xl border-2 border-[#5964BD]
+                  bg-gradient-to-b from-[#303873] to-[#222858]
+                  px-5 py-4 text-right font-black
+                  shadow-[0_4px_0_#151A3D]
+                "
               >
                 {item.label}
               </button>
             ))}
           </nav>
 
-          <div className="mt-4 grid grid-cols-2 gap-2 border-t border-white/10 pt-4">
+          <div className="mt-4 grid grid-cols-2 gap-3 border-t border-white/10 pt-4">
             <button
               type="button"
               onClick={openAccount}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[#5862AE] bg-[#272C60] px-4 py-4 font-black"
+              className="
+                inline-flex items-center justify-center gap-2
+                rounded-2xl border-2 border-[#5964BD]
+                bg-gradient-to-b from-[#303873] to-[#222858]
+                px-4 py-4 font-black
+                shadow-[0_4px_0_#151A3D]
+              "
             >
               <UserRound className="h-5 w-5" />
+
               {user
                 ? isAdmin
                   ? 'الإدارة'
@@ -178,7 +246,13 @@ export default function Header({
               <button
                 type="button"
                 onClick={() => navigate('login')}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#EF3340] px-4 py-4 font-black"
+                className="
+                  inline-flex items-center justify-center gap-2
+                  rounded-2xl border-2 border-[#FF5966]
+                  bg-gradient-to-b from-[#FF4B59] to-[#D92334]
+                  px-4 py-4 font-black
+                  shadow-[0_4px_0_#8F1020]
+                "
               >
                 <LogIn className="h-5 w-5" />
                 تسجيل الدخول
@@ -187,7 +261,13 @@ export default function Header({
               <button
                 type="button"
                 onClick={openAccount}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#FACC15] px-4 py-4 font-black text-[#211047]"
+                className="
+                  inline-flex items-center justify-center gap-2
+                  rounded-2xl border-2 border-[#FFE36A]
+                  bg-gradient-to-b from-[#FFD83D] to-[#F4B800]
+                  px-4 py-4 font-black text-[#211047]
+                  shadow-[0_4px_0_#9C7000]
+                "
               >
                 <UserRound className="h-5 w-5" />
                 فتح الحساب
