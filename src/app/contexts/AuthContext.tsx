@@ -184,29 +184,6 @@ export function AuthProvider({
       return null;
     }
 
-    const { error: profileError } = await supabase
-      .from('profiles')
-      .upsert(
-        {
-          id: data.user.id,
-          email: cleanEmail,
-          full_name: cleanName,
-          role: 'user',
-        },
-        {
-          onConflict: 'id',
-        },
-      );
-
-    if (profileError) {
-      console.error(
-        'Profile creation error:',
-        profileError,
-      );
-
-      return null;
-    }
-
     const newUser: AppUser = {
       id: data.user.id,
       email: cleanEmail,
