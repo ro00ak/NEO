@@ -108,7 +108,7 @@ export default function GameSetup({
     );
   }, [categories, search]);
 
-  const maxSelections = Math.min(6, categories.length);
+  const maxSelections = 6;
 
   const toggleCategory = (id: string) => {
     setSelected((current) => {
@@ -166,7 +166,7 @@ export default function GameSetup({
           </h1>
 
           <p className="mt-4 text-lg text-white/70">
-            اختر الفئات التي تريد اللعب بها
+            اختر 6 فئات للبدء بالمنافسة
           </p>
         </div>
 
@@ -192,16 +192,16 @@ export default function GameSetup({
           <button
             type="button"
             onClick={selectRandomCategories}
-            disabled={categories.length === 0}
+            disabled={categories.length < 6}
             className="inline-flex h-14 items-center justify-center gap-3 rounded-2xl bg-yellow-400 px-7 font-black text-[#321064] transition enabled:hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-40"
           >
             <Shuffle className="h-5 w-5" />
-            اختر عشوائيًا
+            اختيار عشوائي (6)
           </button>
         </div>
 
         <div className="mt-8 flex items-center justify-between rounded-2xl border border-white/10 bg-white/10 px-5 py-4">
-          <span className="font-bold">الفئات المختارة</span>
+          <span className="font-bold">الفئات المختارة (يجب اختيار 6)</span>
 
           <span className="rounded-full bg-yellow-400 px-4 py-1 font-black text-[#321064]">
             {selected.length} / {maxSelections}
@@ -221,7 +221,7 @@ export default function GameSetup({
             </h2>
 
             <p className="mt-3 text-white/55">
-              أضف فئة من لوحة الإدارة وتأكد أنها مفعلة.
+              أضف فئات من لوحة الإدارة وتأكد أنها مفعلة (يجب أن توفر 6 فئات على الأقل).
             </p>
           </div>
         ) : (
@@ -307,10 +307,7 @@ export default function GameSetup({
         <div className="mt-12 flex justify-center">
           <button
             type="button"
-            disabled={
-              selected.length === 0 ||
-              selected.length !== maxSelections
-            }
+            disabled={selected.length !== 6}
             onClick={continueToTeams}
             className="min-w-64 rounded-2xl bg-yellow-400 px-8 py-4 text-lg font-black text-[#321064] transition enabled:hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-40"
           >
