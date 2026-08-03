@@ -5,17 +5,20 @@ import {
   Sparkles,
   Star,
 } from 'lucide-react';
+
+import { useAuth } from '../contexts/AuthContext';
 import { useCurrency } from '../contexts/CurrencyContext';
 
 interface PricingProps {
   onNavigate: (page: string) => void;
 }
 
-const packages = [
+export const packages = [
   {
     id: 'one-game',
     title: 'لعبة واحدة',
     games: '1 لعبة',
+    gamesCount: 1,
     price: 0.9,
     description: 'مناسبة لتجربة اللعبة لأول مرة.',
     icon: Gamepad2,
@@ -26,6 +29,7 @@ const packages = [
     id: 'two-games',
     title: 'باقة لعبتين',
     games: '2 لعبتين',
+    gamesCount: 2,
     price: 1.6,
     description: 'خيار مناسب للعبتين منفصلتين.',
     icon: Gamepad2,
@@ -36,6 +40,7 @@ const packages = [
     id: 'five-games',
     title: 'باقة 5 ألعاب',
     games: '5 ألعاب',
+    gamesCount: 5,
     price: 3,
     description: 'باقة مناسبة للمجموعات والجلسات.',
     icon: Star,
@@ -46,6 +51,7 @@ const packages = [
     id: 'eight-games',
     title: 'باقة 8 ألعاب',
     games: '8 ألعاب',
+    gamesCount: 8,
     price: 5,
     description: 'عدد أكبر من الألعاب بسعر أفضل.',
     icon: Sparkles,
@@ -56,20 +62,28 @@ const packages = [
     id: 'full-game',
     title: 'اللعبة كاملة',
     games: 'لعب غير محدود',
+    gamesCount: null,
     price: 7,
     description: 'اشترِ اللعبة كاملة والعب بدون حدود.',
     icon: Crown,
     featured: true,
     bestValue: false,
   },
-];
+] as const;
 
-export default function Pricing({ onNavigate }: PricingProps) {
+export default function Pricing({
+  onNavigate,
+}: PricingProps) {
+  const { user } = useAuth();
   const { formatPrice, currency } = useCurrency();
 
   const handlePurchase = (packageId: string) => {
-    sessionStorage.setItem('selectedPackage', packageId);
-    onNavigate('account');
+    sessionStorage.setItem(
+      'selectedPackage',
+      packageId,
+    );
+
+    onNavigate(user ? 'account' : 'login');
   };
 
   return (
@@ -89,7 +103,8 @@ export default function Pricing({ onNavigate }: PricingProps) {
           </h2>
 
           <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-white/58 sm:text-lg">
-            اختر عدد الألعاب المناسب لك، أو اشترِ اللعبة كاملة واستمتع باللعب بدون حدود.
+            اختر عدد الألعاب المناسب، أو اشترِ الباقة
+            الذهبية واستمتع باللعب بدون حدود.
           </p>
         </div>
 
@@ -103,10 +118,10 @@ export default function Pricing({ onNavigate }: PricingProps) {
                 key={item.id}
                 className={`relative flex min-h-[410px] flex-col overflow-hidden rounded-[24px] border p-4 shadow-[0_14px_38px_rgba(0,0,0,0.2)] sm:min-h-[500px] sm:rounded-[30px] sm:p-6 ${
                   item.featured
-                    ? 'border-[#FFD84D] bg-gradient-to-b from-[#5B4310]/85 to-[#281702]/90]'
+                    ? 'border-[#FFD84D] bg-gradient-to-b from-[#5B4310]/85 to-[#281702]/90'
                     : item.bestValue
-                    ? 'border-purple-400/55 bg-purple-500/10'
-                    : 'border-white/10 bg-white/[0.065]'
+                      ? 'border-purple-400/55 bg-purple-500/10'
+                      : 'border-white/10 bg-white/[0.065]'
                 } ${
                   isLast
                     ? 'col-span-2 mx-auto w-[calc(50%-0.375rem)] min-w-[calc(50%-0.375rem)] lg:col-span-1 lg:w-auto lg:min-w-0'
@@ -179,12 +194,6 @@ export default function Pricing({ onNavigate }: PricingProps) {
               </article>
             );
           })}
-        </div>
-
-        <div className="mx-auto mt-8 max-w-3xl rounded-2xl border border-white/10 bg-white/[0.05] p-4 text-center sm:mt-10 sm:rounded-3xl sm:p-6">
-          <p className="text-xs leading-6 text-white/62 sm:text-base sm:leading-8">
-            بعد اختيار الباقة سيتم نقلك إلى حسابك لإكمال الدفع.
-          </p>
         </div>
       </div>
     </section>
