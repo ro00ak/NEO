@@ -102,7 +102,11 @@ export default function Header({
                 hover:border-[#FACC15]
               "
             >
-              <span className="text-xl">{currency.flag}</span>
+              <img
+                src={currency.flagUrl}
+                alt={currency.name}
+                className="h-6 w-6 rounded-full object-cover"
+              />
 
               <span>{currency.code}</span>
 
@@ -144,9 +148,11 @@ export default function Header({
                             : 'border-[#7B8494] bg-white text-[#252B35] hover:border-[#FACC15]'
                         }`}
                       >
-                        <span className="text-xl">
-                          {item.flag}
-                        </span>
+                        <img
+                          src={item.flagUrl}
+                          alt={item.name}
+                          className="h-6 w-6 rounded-full object-cover"
+                        />
 
                         <span className="text-sm">
                           {item.code}
@@ -321,7 +327,7 @@ export default function Header({
                   value={item.code}
                   className="bg-[#272C60]"
                 >
-                  {item.flag} {item.code} — {item.name}
+                  {item.code} — {item.name}
                 </option>
               ))}
             </select>
