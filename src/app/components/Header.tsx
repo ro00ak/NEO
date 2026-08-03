@@ -327,31 +327,32 @@ export default function Header({
       </header>
 
       {/* =========================
-          هيدر الجوال فقط
+          هيدر الجوال فقط (الترتيب الجديد)
       ========================== */}
       <header className="fixed inset-x-0 top-0 z-50 px-3 pt-3 text-white lg:hidden">
-        <div className="mx-auto flex min-h-[62px] items-center rounded-[21px] border border-[#7868D9]/40 bg-[linear-gradient(135deg,rgba(16,7,37,0.97),rgba(28,11,61,0.96))] px-3 py-2.5 shadow-[0_6px_0_rgba(43,31,105,0.72),0_16px_38px_rgba(4,0,18,0.34)]">
+        <div className="mx-auto flex min-h-[62px] items-center justify-between rounded-[21px] border border-[#7868D9]/40 bg-[linear-gradient(135deg,rgba(16,7,37,0.97),rgba(28,11,61,0.96))] px-3 py-2.5 shadow-[0_6px_0_rgba(43,31,105,0.72),0_16px_38px_rgba(4,0,18,0.34)]">
 
-          {/* يسار: الثلاث خطوط + العملة */}
+          {/* 1. يسار: زر تسجيل الدخول أو لوحة الإدارة */}
+          <button
+            type="button"
+            onClick={openAccount}
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[#FACC15]/35 bg-gradient-to-b from-[#F9D441] to-[#E8AC00] px-4 font-black text-[#28104B] shadow-[0_3px_0_#8A6200]"
+          >
+            {user ? (
+              <UserRound className="h-4 w-4 shrink-0" />
+            ) : (
+              <LogIn className="h-4 w-4 shrink-0" />
+            )}
+
+            <span className="text-xs truncate max-w-[130px]">
+              {accountLabel}
+            </span>
+          </button>
+
+          {/* العناصر في المنتصف واليمين */}
           <div className="flex items-center gap-2">
 
-            <button
-              type="button"
-              onClick={() => setMobileMenuOpen((current) => !current)}
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#7569CB]/50 bg-gradient-to-b from-[#302A68] to-[#211A4D] text-[#FACC15] shadow-[0_3px_0_#151132]"
-              aria-label={
-                mobileMenuOpen
-                  ? 'إغلاق القائمة'
-                  : 'فتح القائمة'
-              }
-            >
-              {mobileMenuOpen ? (
-                <X className="h-5 w-5" />
-              ) : (
-                <Menu className="h-5 w-5" />
-              )}
-            </button>
-
+            {/* 2. الوسط: زر/علم العملة */}
             <div className="relative">
               <button
                 type="button"
@@ -438,24 +439,25 @@ export default function Header({
               </AnimatePresence>
             </div>
 
+            {/* 3. اليمين: زر الثلاث خطوط (القائمة الجانبية) */}
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen((current) => !current)}
+              className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#7569CB]/50 bg-gradient-to-b from-[#302A68] to-[#211A4D] text-[#FACC15] shadow-[0_3px_0_#151132]"
+              aria-label={
+                mobileMenuOpen
+                  ? 'إغلاق القائمة'
+                  : 'فتح القائمة'
+              }
+            >
+              {mobileMenuOpen ? (
+                <X className="h-5 w-5" />
+              ) : (
+                <Menu className="h-5 w-5" />
+              )}
+            </button>
+
           </div>
-
-          {/* يمين: تسجيل الدخول */}
-          <button
-            type="button"
-            onClick={openAccount}
-            className="ml-auto inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[#FACC15]/35 bg-gradient-to-b from-[#F9D441] to-[#E8AC00] px-4 font-black text-[#28104B] shadow-[0_3px_0_#8A6200]"
-          >
-            {user ? (
-              <UserRound className="h-4 w-4" />
-            ) : (
-              <LogIn className="h-4 w-4" />
-            )}
-
-            <span className="text-xs">
-              {accountLabel}
-            </span>
-          </button>
 
         </div>
       </header>
@@ -502,7 +504,7 @@ export default function Header({
                 </button>
               </div>
 
-              {/* روابط فقط، بدون الحساب والعملات */}
+              {/* روابط القائمة الجانبية */}
               <nav className="grid gap-3">
                 {navigationItems.map((item) => (
                   <button
