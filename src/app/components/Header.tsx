@@ -1,29 +1,23 @@
 import { useState } from 'react';
 import { motion } from 'motion/react';
-import { Search, ShoppingBag, Menu, X, Sun, Moon, Globe, User, LogOut, Settings } from 'lucide-react';
+import { Menu, X, User, LogOut, Settings } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
-import { useTheme } from 'next-themes';
-import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 
 interface HeaderProps {
   onNavigate: (page: string) => void;
-  onCartClick: () => void;
 }
 
-export default function Header({ onNavigate, onCartClick }: HeaderProps) {
+export default function Header({ onNavigate }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const { language, setLanguage, t } = useLanguage();
-  const { theme, setTheme } = useTheme();
-  const { totalItems } = useCart();
+  const { language } = useLanguage();
   const { user, logout, isAdmin } = useAuth();
 
   const navItems = [
     { key: 'الرئيسية', page: 'home' },
     { key: 'ابدأ اللعب', page: 'play' },
     { key: 'طريقة اللعب', page: 'how' },
-    { key: 'التصنيفات', page: 'leaderboard' },
   ];
 
   // Close user menu when clicking outside
@@ -91,55 +85,6 @@ export default function Header({ onNavigate, onCartClick }: HeaderProps) {
 
           {/* Actions */}
           <div className="flex items-center gap-4">
-            {/* Search */}
-            <motion.button
-              type="button"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-              className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-            >
-              <Search className="w-5 h-5" />
-            </motion.button>
-
-            {/* Theme Toggle */}
-            <motion.button
-              type="button"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-            >
-              {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-            </motion.button>
-
-            {/* Language Toggle */}
-            <motion.button
-              type="button"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setLanguage(language === 'ar' ? 'en' : 'ar')}
-              className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors flex items-center gap-1"
-            >
-              <Globe className="w-5 h-5" />
-              <span className="text-xs font-semibold">{language === 'ar' ? 'EN' : 'AR'}</span>
-            </motion.button>
-
-            {/* Cart */}
-            <motion.button
-              type="button"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={onCartClick}
-              className="relative p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-            >
-              <ShoppingBag className="w-5 h-5" />
-              {totalItems > 0 && (
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-black dark:bg-white text-white dark:text-black rounded-full text-xs flex items-center justify-center font-bold">
-                  {totalItems}
-                </span>
-              )}
-            </motion.button>
-
             {/* User Menu */}
             {user ? (
               <div className="relative user-menu-container">
