@@ -23,6 +23,10 @@ const navigationItems = [
     page: 'play',
   },
   {
+    label: 'الباقات',
+    page: 'pricing',
+  },
+  {
     label: 'طريقة اللعب',
     page: 'how',
   },
