@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import {
+  ChevronDown,
   LogIn,
   Menu,
   UserRound,
@@ -44,6 +45,8 @@ export default function Header({
   const { currency, setCurrencyCode } = useCurrency();
   const [mobileMenuOpen, setMobileMenuOpen] =
     useState(false);
+  const [currencyMenuOpen, setCurrencyMenuOpen] =
+    useState(false);
 
   const navigate = (page: string) => {
     onNavigate(page);
@@ -82,40 +85,78 @@ export default function Header({
 
         {/* الحساب واختيار العملة (يسار القائمة في الديسكتوب) */}
         <div className="hidden items-center gap-3 lg:flex">
-          <div className="relative">
-            <select
-              value={currency.code}
-              onChange={(event) =>
-                setCurrencyCode(
-                  event.target.value as CurrencyCode,
-                )
+          <div className="relative hidden lg:block">
+            <button
+              type="button"
+              onClick={() =>
+                setCurrencyMenuOpen((current) => !current)
               }
-              aria-label="اختيار العملة"
               className="
-                h-11 cursor-pointer appearance-none rounded-2xl
-                border-2 border-[#5964BD]
+                flex h-11 min-w-[105px] items-center justify-center gap-2
+                rounded-2xl border-2 border-[#5964BD]
                 bg-gradient-to-b from-[#303873] to-[#222858]
-                pr-4 pl-10 text-sm font-black text-white
-                shadow-[0_4px_0_#151A3D]
-                outline-none transition
+                px-4 font-black text-white
+                shadow-[0_4px_0_#151A3D,inset_0_1px_0_rgba(255,255,255,0.2)]
+                transition
                 hover:-translate-y-1
                 hover:border-[#FACC15]
               "
             >
-              {currencies.map((item) => (
-                <option
-                  key={item.code}
-                  value={item.code}
-                  className="bg-[#222858] text-white"
-                >
-                  {item.flag} {item.code} — {item.name}
-                </option>
-              ))}
-            </select>
+              <span className="text-xl">{currency.flag}</span>
 
-            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-[#FACC15]">
-              ▼
-            </span>
+              <span>{currency.code}</span>
+
+              <ChevronDown
+                className={`h-4 w-4 text-[#FACC15] transition ${
+                  currencyMenuOpen ? 'rotate-180' : ''
+                }`}
+              />
+            </button>
+
+            {currencyMenuOpen && (
+              <div
+                className="
+                  absolute left-0 top-[calc(100%+14px)] z-[100]
+                  w-[260px]
+                  rounded-[28px] border-2 border-[#5964BD]
+                  bg-[#F7F7F8] p-4
+                  shadow-[0_18px_50px_rgba(0,0,0,0.35)]
+                "
+              >
+                <div className="grid grid-cols-2 gap-3">
+                  {currencies.map((item) => {
+                    const isSelected =
+                      currency.code === item.code;
+
+                    return (
+                      <button
+                        key={item.code}
+                        type="button"
+                        onClick={() => {
+                          setCurrencyCode(
+                            item.code as CurrencyCode,
+                          );
+                          setCurrencyMenuOpen(false);
+                        }}
+                        className={`flex h-12 items-center justify-center gap-2 rounded-full border-2 px-3 font-black transition ${
+                          isSelected
+                            ? 'border-[#321064] bg-[#E4E6EA] text-[#321064]'
+                            : 'border-[#7B8494] bg-white text-[#252B35] hover:border-[#FACC15]'
+                        }`}
+                      >
+                        <span className="text-xl">
+                          {item.flag}
+                        </span>
+
+                        <span className="text-sm">
+                          {item.code}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
 
           <button
