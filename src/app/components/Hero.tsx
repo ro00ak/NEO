@@ -179,17 +179,15 @@ export default function Hero({
               repeat: Infinity,
               ease: 'easeInOut',
             }}
-            className="relative w-full max-w-[560px]"
+            className="relative flex w-full max-w-[560px] items-center justify-center"
           >
-            <div className="absolute inset-10 rounded-[50px] bg-[#A855F7]/40 blur-[70px]" />
+            <div className="absolute inset-16 rounded-full bg-[#A855F7]/25 blur-[70px]" />
 
-            <div className="relative flex aspect-square items-center justify-center rounded-[48px] border border-white/20 bg-white/5 p-8 shadow-[0_30px_100px_rgba(0,0,0,0.45)]">
-              <img
-                src="/almaydan-logo.png?v=3"
-                alt="الميدان يا حميدان"
-                className="max-h-full max-w-full object-contain"
-              />
-            </div>
+            <img
+              src="/almaydan-logo.png?v=4"
+              alt="الميدان يا حميدان"
+              className="relative z-10 h-auto w-full max-w-[520px] object-contain"
+            />
           </motion.div>
         </motion.div>
       </div>
