@@ -6,6 +6,7 @@ import {
   Sparkles,
   Star,
 } from 'lucide-react';
+import { useCurrency } from '../contexts/CurrencyContext';
 
 interface PricingProps {
   onNavigate: (page: string) => void;
@@ -16,9 +17,7 @@ const packages = [
     id: 'one-game',
     title: 'لعبة واحدة',
     games: '1 لعبة',
-    price: '0.900',
-    currency: 'ر.ع',
-    saudiPrice: 'حوالي 9 ر.س',
+    price: 0.9,
     description: 'مناسبة لتجربة اللعبة لأول مرة.',
     icon: Gamepad2,
     featured: false,
@@ -28,9 +27,7 @@ const packages = [
     id: 'two-games',
     title: 'باقة لعبتين',
     games: '2 لعبتين',
-    price: '1.600',
-    currency: 'ر.ع',
-    saudiPrice: 'حوالي 16 ر.س',
+    price: 1.6,
     description: 'خيار مناسب للعبتين منفصلتين.',
     icon: Gamepad2,
     featured: false,
@@ -40,9 +37,7 @@ const packages = [
     id: 'five-games',
     title: 'باقة 5 ألعاب',
     games: '5 ألعاب',
-    price: '3.000',
-    currency: 'ر.ع',
-    saudiPrice: 'حوالي 30 ر.س',
+    price: 3,
     description: 'باقة مناسبة للمجموعات والجلسات.',
     icon: Star,
     featured: false,
@@ -52,9 +47,7 @@ const packages = [
     id: 'eight-games',
     title: 'باقة 8 ألعاب',
     games: '8 ألعاب',
-    price: '5.000',
-    currency: 'ر.ع',
-    saudiPrice: 'حوالي 50 ر.س',
+    price: 5,
     description: 'عدد أكبر من الألعاب بسعر أفضل.',
     icon: Sparkles,
     featured: false,
@@ -64,9 +57,7 @@ const packages = [
     id: 'full-game',
     title: 'اللعبة كاملة',
     games: 'لعب غير محدود',
-    price: '7.000',
-    currency: 'ر.ع',
-    saudiPrice: 'حوالي 70 ر.س',
+    price: 7,
     description: 'اشترِ اللعبة كاملة والعب بدون حدود.',
     icon: Crown,
     featured: true,
@@ -77,6 +68,8 @@ const packages = [
 export default function Pricing({
   onNavigate,
 }: PricingProps) {
+  const { formatPrice, currency } = useCurrency();
+
   const handlePurchase = (packageId: string) => {
     sessionStorage.setItem(
       'selectedPackage',
@@ -158,17 +151,13 @@ export default function Pricing({
                 </p>
 
                 <div className="mt-6 flex items-end gap-2">
-                  <strong className="text-5xl font-black text-[#FACC15]">
-                    {item.price}
+                  <strong className="text-4xl font-black text-[#FACC15] sm:text-5xl">
+                    {formatPrice(item.price)}
                   </strong>
-
-                  <span className="pb-2 font-bold text-white/65">
-                    {item.currency}
-                  </span>
                 </div>
 
-                <p className="mt-2 text-sm text-white/45">
-                  {item.saudiPrice}
+                <p className="mt-3 text-sm font-bold text-white/45">
+                  السعر معروض بعملة {currency.name}
                 </p>
 
                 <p className="mt-6 min-h-14 leading-7 text-white/65">
