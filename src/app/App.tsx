@@ -273,10 +273,7 @@ export default function App() {
             >
               <div className="min-h-screen bg-[#2E1065]">
                 {showHeader && (
-                  <Header
-                    onNavigate={handleNavigate}
-                    onCartClick={() => handleNavigate('play')}
-                  />
+                  <Header onNavigate={handleNavigate} />
                 )}
 
                 {renderPage()}
