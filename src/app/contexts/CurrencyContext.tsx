@@ -18,7 +18,7 @@ export type CurrencyCode =
 
 interface Currency {
   code: CurrencyCode;
-  flag: string;
+  flagUrl: string;
   name: string;
   symbol: string;
   rate: number;
@@ -28,7 +28,7 @@ interface Currency {
 export const currencies: Currency[] = [
   {
     code: 'OMR',
-    flag: '🇴🇲',
+    flagUrl: 'https://flagcdn.com/w40/om.png',
     name: 'الريال العماني',
     symbol: 'ر.ع',
     rate: 1,
@@ -36,7 +36,7 @@ export const currencies: Currency[] = [
   },
   {
     code: 'SAR',
-    flag: '🇸🇦',
+    flagUrl: 'https://flagcdn.com/w40/sa.png',
     name: 'الريال السعودي',
     symbol: 'ر.س',
     rate: 9.75,
@@ -44,7 +44,7 @@ export const currencies: Currency[] = [
   },
   {
     code: 'AED',
-    flag: '🇦🇪',
+    flagUrl: 'https://flagcdn.com/w40/ae.png',
     name: 'الدرهم الإماراتي',
     symbol: 'د.إ',
     rate: 9.56,
@@ -52,7 +52,7 @@ export const currencies: Currency[] = [
   },
   {
     code: 'QAR',
-    flag: '🇶🇦',
+    flagUrl: 'https://flagcdn.com/w40/qa.png',
     name: 'الريال القطري',
     symbol: 'ر.ق',
     rate: 9.48,
@@ -60,15 +60,15 @@ export const currencies: Currency[] = [
   },
   {
     code: 'KWD',
-    flag: '🇰🇼',
+    flagUrl: 'https://flagcdn.com/w40/kw.png',
     name: 'الدينار الكويتي',
     symbol: 'د.ك',
-    rate: 0.80,
+    rate: 0.8,
     decimals: 3,
   },
   {
     code: 'BHD',
-    flag: '🇧🇭',
+    flagUrl: 'https://flagcdn.com/w40/bh.png',
     name: 'الدينار البحريني',
     symbol: 'د.ب',
     rate: 0.98,
@@ -76,7 +76,7 @@ export const currencies: Currency[] = [
   },
   {
     code: 'JOD',
-    flag: '🇯🇴',
+    flagUrl: 'https://flagcdn.com/w40/jo.png',
     name: 'الدينار الأردني',
     symbol: 'د.أ',
     rate: 1.845,
@@ -84,10 +84,10 @@ export const currencies: Currency[] = [
   },
   {
     code: 'USD',
-    flag: '🇺🇸',
+    flagUrl: 'https://flagcdn.com/w40/us.png',
     name: 'الدولار الأمريكي',
     symbol: '$',
-    rate: 2.60,
+    rate: 2.6,
     decimals: 2,
   },
 ];
