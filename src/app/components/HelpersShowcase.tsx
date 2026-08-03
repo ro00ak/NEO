@@ -1,42 +1,52 @@
 import {
+  Bomb,
   CircleHelp,
+  Hand,
   Phone,
-  RefreshCw,
-  ShieldCheck,
   Sparkles,
   Swords,
 } from 'lucide-react';
 
 const helpers = [
   {
-    id: 'two-answers',
-    name: 'إجابتان',
-    description: 'تضييق خيارات الإجابة وزيادة فرصة الوصول للإجابة الصحيحة.',
-    icon: CircleHelp,
-  },
-  {
     id: 'phone',
     name: 'اتصال بصديق',
-    description: 'إيقاف المؤقت مؤقتًا حتى تتمكن من الاتصال بصديق.',
+    timing: 'بعد مشاهدة السؤال',
+    description:
+      'بعد ظهور السؤال يمكنك إيقاف المؤقت لمدة دقيقة تقريبًا، والاتصال بصديق لمساعدتك في معرفة الإجابة.',
     icon: Phone,
   },
   {
-    id: 'replace',
-    name: 'تبديل السؤال',
-    description: 'استبدال السؤال بسؤال آخر من نفس الفئة ونفس النقاط.',
-    icon: RefreshCw,
-  },
-  {
-    id: 'second-chance',
-    name: 'فرصة ثانية',
-    description: 'محاولة إضافية للإجابة إذا كانت إجابتك الأولى خاطئة.',
-    icon: ShieldCheck,
-  },
-  {
-    id: 'steal',
-    name: 'سرقة السؤال',
-    description: 'انتزاع فرصة الإجابة من الفريق المنافس والفوز بالنقاط.',
+    id: 'hole',
+    name: 'الحفرة',
+    timing: 'قبل مشاهدة السؤال',
+    description:
+      'تُفعّل قبل فتح السؤال. إذا أجبت إجابة صحيحة تحصل على نقاط السؤال، ويُخصم نفس العدد من نقاط الفريق المنافس. إذا أخطأت فلا يتم خصم شيء.',
     icon: Swords,
+  },
+  {
+    id: 'two-answers',
+    name: 'جاوب جوابين',
+    timing: 'بعد مشاهدة السؤال',
+    description:
+      'تسمح لك بتقديم إجابتين مختلفتين على السؤال، وتُحسب لك الإجابة إذا كانت واحدة منهما صحيحة.',
+    icon: CircleHelp,
+  },
+  {
+    id: 'rest',
+    name: 'استريح',
+    timing: 'قبل مشاهدة السؤال',
+    description:
+      'عندما يكون دورك في اختيار السؤال، فعّل هذه الوسيلة حتى لا يتمكن الفريق المنافس من المشاركة أو الإجابة على هذا السؤال.',
+    icon: Hand,
+  },
+  {
+    id: 'trap',
+    name: 'الفخ',
+    timing: 'قبل مشاهدة السؤال',
+    description:
+      'إذا لم تجب عن السؤال، ينتقل إلى الفريق المنافس. إذا أجاب المنافس بشكل خاطئ، تُخصم منه قيمة السؤال كاملة: 200 أو 400 أو 600 نقطة.',
+    icon: Bomb,
   },
 ];
 
@@ -59,7 +69,8 @@ export default function HelpersShowcase() {
           </h2>
 
           <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-white/55 sm:text-lg">
-            اختر وسائل المساعدة المناسبة لفريقك واستخدمها بذكاء أثناء المنافسة.
+            اختر وسائل المساعدة المناسبة واستخدم كل وسيلة في الوقت
+            الصحيح أثناء المنافسة.
           </p>
         </div>
 
@@ -71,7 +82,7 @@ export default function HelpersShowcase() {
             return (
               <article
                 key={helper.id}
-                className={`relative flex min-h-[270px] flex-col rounded-[24px] border border-white/10 bg-white/[0.065] p-4 text-center shadow-[0_12px_32px_rgba(0,0,0,0.18)] sm:min-h-[330px] sm:rounded-[28px] sm:p-6 ${
+                className={`relative flex min-h-[300px] flex-col rounded-[24px] border border-white/10 bg-white/[0.065] p-4 text-center shadow-[0_12px_32px_rgba(0,0,0,0.18)] sm:min-h-[370px] sm:rounded-[28px] sm:p-6 ${
                   isLast
                     ? 'col-span-2 mx-auto w-[calc(50%-0.375rem)] min-w-[calc(50%-0.375rem)] lg:col-span-1 lg:w-auto lg:min-w-0'
                     : ''
@@ -89,7 +100,11 @@ export default function HelpersShowcase() {
                   {helper.name}
                 </h3>
 
-                <p className="mt-3 flex-1 text-[11px] leading-5 text-white/58 sm:mt-5 sm:text-sm sm:leading-7">
+                <span className="mx-auto mt-3 rounded-full border border-[#FACC15]/25 bg-[#FACC15]/10 px-3 py-1 text-[9px] font-black text-[#FACC15] sm:text-xs">
+                  {helper.timing}
+                </span>
+
+                <p className="mt-4 flex-1 text-[11px] leading-6 text-white/60 sm:text-sm sm:leading-7">
                   {helper.description}
                 </p>
 
@@ -103,7 +118,8 @@ export default function HelpersShowcase() {
 
         <div className="mx-auto mt-8 max-w-3xl rounded-2xl border border-[#FACC15]/20 bg-[#FACC15]/8 px-4 py-4 text-center sm:mt-10 sm:rounded-3xl sm:px-6 sm:py-5">
           <p className="text-xs font-bold leading-6 text-white/78 sm:text-base sm:leading-8">
-            كل فريق يختار 3 وسائل مساعدة قبل بدء المباراة، ولا يمكن استخدام الوسيلة أكثر من مرة في نفس اللعبة.
+            كل فريق يختار 3 وسائل مساعدة قبل بدء المباراة، ولا يمكن
+            استخدام الوسيلة نفسها أكثر من مرة في اللعبة.
           </p>
         </div>
       </div>
