@@ -14,6 +14,7 @@ import Footer from './components/Footer';
 import Login from './pages/Login';
 import AdminDashboard from './pages/AdminDashboard';
 import Account from './pages/Account';
+import Pricing from './pages/Pricing';
 
 import GameSetup from './pages/GameSetup';
 import TeamsSetup from './pages/TeamsSetup';
@@ -38,7 +39,8 @@ type Page =
   | 'login'
   | 'admin'
   | 'account'
-  | 'helpers-info';
+  | 'helpers-info'
+  | 'pricing';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
@@ -242,6 +244,9 @@ export default function App() {
 
       case 'account':
         return <Account onNavigate={handleNavigate} />;
+
+      case 'pricing':
+        return <Pricing onNavigate={handleNavigate} />;
 
       case 'helpers-info':
         return (
