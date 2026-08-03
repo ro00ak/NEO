@@ -1,198 +1,246 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from 'react';
 
 import { supabase } from '../../utils/supabase';
 
-interface User {
+export type UserRole = 'admin' | 'user';
+
+export interface AppUser {
   id: string;
   email: string;
   name: string;
-  role: 'admin' | 'user' | 'wholesale';
-  businessName?: string;
-  taxId?: string;
+  role: UserRole;
 }
 
 interface AuthContextType {
-  user: User | null;
-  login: (email: string, password: string) => Promise<boolean>;
-  loginWithGoogle: () => Promise<void>;
-  register: (name: string, email: string, password: string, role?: 'user' | 'wholesale', businessName?: string, taxId?: string) => Promise<boolean>;
-  logout: () => void;
+  user: AppUser | null;
+  loading: boolean;
+  login: (
+    email: string,
+    password: string,
+  ) => Promise<AppUser | null>;
+  register: (
+    name: string,
+    email: string,
+    password: string,
+  ) => Promise<AppUser | null>;
+  logout: () => Promise<void>;
   isAdmin: boolean;
-  isWholesale: boolean;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType | undefined>(
+  undefined,
+);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+interface AuthProviderProps {
+  children: ReactNode;
+}
+
+export function AuthProvider({
+  children,
+}: AuthProviderProps) {
+  const [user, setUser] = useState<AppUser | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const getProfile = async (
+    userId: string,
+    email: string,
+    metadataName?: string,
+  ): Promise<AppUser> => {
+    const { data: profile, error } = await supabase
+      .from('profiles')
+      .select('id, email, full_name, role')
+      .eq('id', userId)
+      .maybeSingle();
+
+    if (error) {
+      console.error('Profile fetch error:', error);
+    }
+
+    return {
+      id: userId,
+      email,
+      name:
+        profile?.full_name ||
+        metadataName ||
+        email.split('@')[0] ||
+        'مستخدم',
+      role: profile?.role === 'admin' ? 'admin' : 'user',
+    };
+  };
 
   useEffect(() => {
-    // Check active sessions and sets the user
-    supabase.auth.getSession().then(async (response: any) => {
-      const session = response.data.session;
-      if (session?.user) {
-        // Fetch profile
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', session.user.id)
-          .single();
+    let isMounted = true;
 
-        setUser({
-          id: session.user.id,
-          email: session.user.email || '',
-          name: profile?.full_name || session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'User',
-          role: profile?.role || 'user',
-          businessName: profile?.businessName,
-          taxId: profile?.taxId,
-        });
-      } else {
-        // Fallback to local storage mock user if no supabase session
-        const savedUser = localStorage.getItem('user');
-        if (savedUser) {
-          setUser(JSON.parse(savedUser));
-        }
+    const loadSession = async () => {
+      setLoading(true);
+
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!isMounted) {
+        return;
       }
-    });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event: any, session: any) => {
-      if (session?.user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', session.user.id)
-          .single();
-
-        setUser({
-          id: session.user.id,
-          email: session.user.email || '',
-          name: profile?.full_name || session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'User',
-          role: profile?.role || 'user',
-          businessName: profile?.businessName,
-          taxId: profile?.taxId,
-        });
-      } else {
+      if (!session?.user) {
         setUser(null);
+        setLoading(false);
+        return;
       }
-    });
 
-    return () => subscription.unsubscribe();
+      const currentUser = await getProfile(
+        session.user.id,
+        session.user.email || '',
+        session.user.user_metadata?.full_name,
+      );
+
+      if (isMounted) {
+        setUser(currentUser);
+        setLoading(false);
+      }
+    };
+
+    loadSession();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(
+      async (_event, session) => {
+        if (!session?.user) {
+          setUser(null);
+          setLoading(false);
+          return;
+        }
+
+        const currentUser = await getProfile(
+          session.user.id,
+          session.user.email || '',
+          session.user.user_metadata?.full_name,
+        );
+
+        setUser(currentUser);
+        setLoading(false);
+      },
+    );
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
-    // Real Supabase login
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    
-    if (!error && data.user) {
-      return true;
+  const login = async (
+    email: string,
+    password: string,
+  ): Promise<AppUser | null> => {
+    const { data, error } =
+      await supabase.auth.signInWithPassword({
+        email: email.trim().toLowerCase(),
+        password,
+      });
+
+    if (error || !data.user) {
+      console.error('Login error:', error);
+      return null;
     }
 
-    // Fallback to Mock authentication for admin/wholesale test accounts
-    if (email === 'admin@luxury.com' && password === 'admin123') {
-      const adminUser: User = {
-        id: '1',
-        email: 'admin@luxury.com',
-        name: 'Admin',
-        role: 'admin',
-      };
-      setUser(adminUser);
-      localStorage.setItem('user', JSON.stringify(adminUser));
-      return true;
-    } else if (email === 'wholesale@luxury.com' && password === 'wholesale123') {
-      const wholesaleUser: User = {
-        id: '2',
-        email: 'wholesale@luxury.com',
-        name: 'Wholesale Customer',
-        role: 'wholesale',
-        businessName: 'Demo Wholesale Business',
-        taxId: '123456789',
-      };
-      setUser(wholesaleUser);
-      localStorage.setItem('user', JSON.stringify(wholesaleUser));
-      return true;
-    } else if (email === 'customer@luxury.com' && password === 'customer123') {
-      const customerUser: User = {
-        id: '3',
-        email: 'customer@luxury.com',
-        name: 'Ahmed Al-Rashidi',
-        role: 'user',
-      };
-      setUser(customerUser);
-      localStorage.setItem('user', JSON.stringify(customerUser));
-      return true;
-    }
-    return false;
+    const currentUser = await getProfile(
+      data.user.id,
+      data.user.email || '',
+      data.user.user_metadata?.full_name,
+    );
+
+    setUser(currentUser);
+
+    return currentUser;
   };
 
-  const loginWithGoogle = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: window.location.origin
-      }
-    });
-  };
+  const register = async (
+    name: string,
+    email: string,
+    password: string,
+  ): Promise<AppUser | null> => {
+    const cleanName = name.trim();
+    const cleanEmail = email.trim().toLowerCase();
 
-  const register = async (name: string, email: string, password: string, role: 'user' | 'wholesale' = 'user', businessName?: string, taxId?: string): Promise<boolean> => {
-    // Try Supabase signup
     const { data, error } = await supabase.auth.signUp({
-      email,
+      email: cleanEmail,
       password,
       options: {
         data: {
-          full_name: name,
-          role: role,
-        }
-      }
+          full_name: cleanName,
+        },
+      },
     });
 
-    if (!error && data.user) {
-      // Create profile record
-      const { error: profileError } = await supabase.from('profiles').insert({
-        id: data.user.id,
-        email: email,
-        full_name: name,
-        role: role,
-        businessName: businessName || null,
-        taxId: taxId || null,
-      });
-      
-      if (profileError) {
-        console.error('Error creating profile:', profileError);
-        alert('تم تسجيل الدخول لكن فشل حفظ البروفايل: ' + profileError.message);
-        return false;
-      }
-      return true;
-    }
-
-    if (error) {
+    if (error || !data.user) {
       console.error('Registration error:', error);
-      alert('خطأ في التسجيل: ' + error.message);
-      return false;
+      return null;
     }
 
-    return false;
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .upsert(
+        {
+          id: data.user.id,
+          email: cleanEmail,
+          full_name: cleanName,
+          role: 'user',
+        },
+        {
+          onConflict: 'id',
+        },
+      );
+
+    if (profileError) {
+      console.error(
+        'Profile creation error:',
+        profileError,
+      );
+
+      return null;
+    }
+
+    const newUser: AppUser = {
+      id: data.user.id,
+      email: cleanEmail,
+      name: cleanName,
+      role: 'user',
+    };
+
+    if (data.session) {
+      setUser(newUser);
+    }
+
+    return newUser;
   };
 
-  const logout = async () => {
-    await supabase.auth.signOut();
+  const logout = async (): Promise<void> => {
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+      console.error('Logout error:', error);
+      return;
+    }
+
     setUser(null);
-    localStorage.removeItem('user');
   };
 
   return (
     <AuthContext.Provider
       value={{
         user,
+        loading,
         login,
-        loginWithGoogle,
         register,
         logout,
         isAdmin: user?.role === 'admin',
-        isWholesale: user?.role === 'wholesale',
       }}
     >
       {children}
@@ -200,10 +248,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function useAuth() {
+export function useAuth(): AuthContextType {
   const context = useContext(AuthContext);
+
   if (!context) {
-    throw new Error('useAuth must be used within AuthProvider');
+    throw new Error(
+      'useAuth must be used inside AuthProvider',
+    );
   }
+
   return context;
 }
