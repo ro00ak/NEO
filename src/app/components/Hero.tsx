@@ -183,11 +183,11 @@ export default function Hero({
           >
             <div className="absolute inset-10 rounded-[50px] bg-[#A855F7]/40 blur-[70px]" />
 
-            <div className="relative overflow-hidden rounded-[48px] border border-white/20 bg-gradient-to-br from-[#7C3AED] via-[#5B21B6] to-[#2E1065] p-5 shadow-[0_30px_100px_rgba(0,0,0,0.45)]">
+            <div className="relative flex aspect-square items-center justify-center rounded-[48px] border border-white/20 bg-white/5 p-8 shadow-[0_30px_100px_rgba(0,0,0,0.45)]">
               <img
-                src="/almaydan-logo.png"
+                src="/almaydan-logo.png?v=3"
                 alt="الميدان يا حميدان"
-                className="aspect-square w-full rounded-[36px] object-contain"
+                className="max-h-full max-w-full object-contain"
               />
             </div>
           </motion.div>
