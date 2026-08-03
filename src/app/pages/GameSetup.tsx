@@ -1,43 +1,122 @@
-import { useMemo, useState } from 'react';
-import { Check, Info, Search, Shuffle, Sparkles } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import {
+  Check,
+  ImageOff,
+  Loader2,
+  Search,
+  Shuffle,
+  Sparkles,
+} from 'lucide-react';
 import { motion } from 'motion/react';
 
-const categories = [
-  { id: 1, name: 'معلومات عامة', icon: '🧠', questions: 120 },
-  { id: 2, name: 'سلطنة عمان', icon: '🇴🇲', questions: 80 },
-  { id: 3, name: 'كرة القدم', icon: '⚽', questions: 150 },
-  { id: 4, name: 'ألعاب الفيديو', icon: '🎮', questions: 90 },
-  { id: 5, name: 'أفلام ومسلسلات', icon: '🎬', questions: 100 },
-  { id: 6, name: 'تقنية', icon: '💻', questions: 70 },
-  { id: 7, name: 'تاريخ', icon: '🏛️', questions: 75 },
-  { id: 8, name: 'جغرافيا', icon: '🌍', questions: 85 },
-  { id: 9, name: 'ألغاز', icon: '🧩', questions: 60 },
-  { id: 10, name: 'خمن الصورة', icon: '🖼️', questions: 50 },
-  { id: 11, name: 'خمن الصوت', icon: '🔊', questions: 45 },
-  { id: 12, name: 'شعارات', icon: '✨', questions: 65 },
-];
+import { supabase } from '../../utils/supabase';
+
+interface Category {
+  id: string;
+  name: string;
+  image_url: string | null;
+  is_active: boolean;
+  questionCount: number;
+}
 
 interface GameSetupProps {
   onNavigate: (page: string) => void;
 }
 
-export default function GameSetup({ onNavigate }: GameSetupProps) {
+export default function GameSetup({
+  onNavigate,
+}: GameSetupProps) {
+  const [categories, setCategories] = useState<Category[]>([]);
   const [search, setSearch] = useState('');
-  const [selected, setSelected] = useState<number[]>([]);
+  const [selected, setSelected] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    loadCategories();
+  }, []);
+
+  const loadCategories = async () => {
+    setLoading(true);
+    setError('');
+
+    try {
+      const { data: categoriesData, error: categoriesError } =
+        await supabase
+          .from('categories')
+          .select('id, name, image_url, is_active, created_at')
+          .eq('is_active', true)
+          .order('created_at', { ascending: false });
+
+      if (categoriesError) {
+        throw categoriesError;
+      }
+
+      const { data: questionsData, error: questionsError } =
+        await supabase
+          .from('questions')
+          .select('category_id')
+          .eq('is_active', true);
+
+      if (questionsError) {
+        throw questionsError;
+      }
+
+      const questionCounts = (questionsData || []).reduce<
+        Record<string, number>
+      >((counts, question) => {
+        const categoryId = question.category_id;
+
+        counts[categoryId] = (counts[categoryId] || 0) + 1;
+
+        return counts;
+      }, {});
+
+      const formattedCategories: Category[] = (
+        categoriesData || []
+      ).map((category) => ({
+        id: category.id,
+        name: category.name,
+        image_url: category.image_url,
+        is_active: category.is_active,
+        questionCount: questionCounts[category.id] || 0,
+      }));
+
+      setCategories(formattedCategories);
+    } catch (caughtError) {
+      console.error('Categories loading error:', caughtError);
+
+      setError(
+        caughtError instanceof Error
+          ? caughtError.message
+          : 'تعذر تحميل الفئات.',
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredCategories = useMemo(() => {
-    return categories.filter((category) =>
-      category.name.includes(search.trim()),
-    );
-  }, [search]);
+    const searchText = search.trim().toLowerCase();
 
-  const toggleCategory = (id: number) => {
+    if (!searchText) {
+      return categories;
+    }
+
+    return categories.filter((category) =>
+      category.name.toLowerCase().includes(searchText),
+    );
+  }, [categories, search]);
+
+  const maxSelections = Math.min(6, categories.length);
+
+  const toggleCategory = (id: string) => {
     setSelected((current) => {
       if (current.includes(id)) {
         return current.filter((item) => item !== id);
       }
 
-      if (current.length >= 6) {
+      if (current.length >= maxSelections) {
         return current;
       }
 
@@ -46,8 +125,28 @@ export default function GameSetup({ onNavigate }: GameSetupProps) {
   };
 
   const selectRandomCategories = () => {
-    const shuffled = [...categories].sort(() => Math.random() - 0.5);
-    setSelected(shuffled.slice(0, 6).map((category) => category.id));
+    const shuffled = [...categories].sort(
+      () => Math.random() - 0.5,
+    );
+
+    setSelected(
+      shuffled
+        .slice(0, maxSelections)
+        .map((category) => category.id),
+    );
+  };
+
+  const continueToTeams = () => {
+    const selectedCategories = categories.filter((category) =>
+      selected.includes(category.id),
+    );
+
+    localStorage.setItem(
+      'selectedCategories',
+      JSON.stringify(selectedCategories),
+    );
+
+    onNavigate('teams');
   };
 
   return (
@@ -67,9 +166,15 @@ export default function GameSetup({ onNavigate }: GameSetupProps) {
           </h1>
 
           <p className="mt-4 text-lg text-white/70">
-            اختر 6 فئات للمنافسة
+            اختر الفئات التي تريد اللعب بها
           </p>
         </div>
+
+        {error && (
+          <div className="mx-auto mt-8 max-w-3xl rounded-2xl border border-red-400/30 bg-red-500/15 px-5 py-4 text-center font-bold text-red-200">
+            {error}
+          </div>
+        )}
 
         <div className="mt-10 flex flex-col gap-4 md:flex-row">
           <div className="relative flex-1">
@@ -87,7 +192,8 @@ export default function GameSetup({ onNavigate }: GameSetupProps) {
           <button
             type="button"
             onClick={selectRandomCategories}
-            className="inline-flex h-14 items-center justify-center gap-3 rounded-2xl bg-yellow-400 px-7 font-black text-[#321064] transition hover:-translate-y-1"
+            disabled={categories.length === 0}
+            className="inline-flex h-14 items-center justify-center gap-3 rounded-2xl bg-yellow-400 px-7 font-black text-[#321064] transition enabled:hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-40"
           >
             <Shuffle className="h-5 w-5" />
             اختر عشوائيًا
@@ -98,51 +204,114 @@ export default function GameSetup({ onNavigate }: GameSetupProps) {
           <span className="font-bold">الفئات المختارة</span>
 
           <span className="rounded-full bg-yellow-400 px-4 py-1 font-black text-[#321064]">
-            {selected.length} / 6
+            {selected.length} / {maxSelections}
           </span>
         </div>
 
-        <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {filteredCategories.map((category) => {
-            const isSelected = selected.includes(category.id);
+        {loading ? (
+          <div className="flex min-h-[420px] items-center justify-center">
+            <Loader2 className="h-11 w-11 animate-spin text-yellow-400" />
+          </div>
+        ) : categories.length === 0 ? (
+          <div className="mt-8 flex min-h-[420px] flex-col items-center justify-center rounded-3xl border border-white/10 bg-white/10 px-6 text-center">
+            <ImageOff className="h-14 w-14 text-yellow-400" />
 
-            return (
-              <motion.button
-                key={category.id}
-                type="button"
-                onClick={() => toggleCategory(category.id)}
-                whileHover={{ y: -5 }}
-                whileTap={{ scale: 0.98 }}
-                className={`relative overflow-hidden rounded-3xl border p-6 text-right transition ${
-                  isSelected
-                    ? 'border-yellow-400 bg-yellow-400/15 shadow-[0_15px_50px_rgba(250,204,21,0.15)]'
-                    : 'border-white/10 bg-white/10 hover:border-white/30'
-                }`}
-              >
-                {isSelected && (
-                  <span className="absolute left-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-yellow-400 text-[#321064]">
-                    <Check className="h-5 w-5" />
-                  </span>
-                )}
+            <h2 className="mt-5 text-2xl font-black">
+              لا توجد فئات متاحة
+            </h2>
 
-                <span className="block text-6xl">{category.icon}</span>
+            <p className="mt-3 text-white/55">
+              أضف فئة من لوحة الإدارة وتأكد أنها مفعلة.
+            </p>
+          </div>
+        ) : (
+          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {filteredCategories.map((category) => {
+              const isSelected = selected.includes(category.id);
 
-                <h2 className="mt-5 text-xl font-black">{category.name}</h2>
+              return (
+                <motion.button
+                  key={category.id}
+                  type="button"
+                  onClick={() => toggleCategory(category.id)}
+                  whileHover={{ y: -5 }}
+                  whileTap={{ scale: 0.98 }}
+                  className={`relative overflow-hidden rounded-3xl border text-right transition ${
+                    isSelected
+                      ? 'border-yellow-400 bg-yellow-400/15 shadow-[0_15px_50px_rgba(250,204,21,0.15)]'
+                      : 'border-white/10 bg-white/10 hover:border-white/30'
+                  }`}
+                >
+                  {isSelected && (
+                    <span className="absolute left-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-yellow-400 text-[#321064] shadow-lg">
+                      <Check className="h-5 w-5" />
+                    </span>
+                  )}
 
-                <div className="mt-3 flex items-center justify-between text-sm text-white/60">
-                  <span>{category.questions} سؤال</span>
-                  <Info className="h-5 w-5" />
-                </div>
-              </motion.button>
-            );
-          })}
-        </div>
+                  <div className="aspect-[4/3] w-full overflow-hidden bg-black/20">
+                    {category.image_url ? (
+                      <img
+                        src={category.image_url}
+                        alt={category.name}
+                        className="h-full w-full object-cover transition duration-300 hover:scale-105"
+                      />
+                    ) : (
+                      <div className="flex h-full items-center justify-center">
+                        <ImageOff className="h-12 w-12 text-white/30" />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="p-5">
+                    <h2 className="text-xl font-black">
+                      {category.name}
+                    </h2>
+
+                    <div className="mt-3 flex items-center justify-between text-sm text-white/60">
+                      <span>
+                        {category.questionCount}{' '}
+                        {category.questionCount === 1
+                          ? 'سؤال'
+                          : 'أسئلة'}
+                      </span>
+
+                      <span
+                        className={`rounded-full px-3 py-1 text-xs font-bold ${
+                          category.questionCount > 0
+                            ? 'bg-green-500/20 text-green-300'
+                            : 'bg-orange-500/20 text-orange-300'
+                        }`}
+                      >
+                        {category.questionCount > 0
+                          ? 'جاهزة'
+                          : 'بدون أسئلة'}
+                      </span>
+                    </div>
+                  </div>
+                </motion.button>
+              );
+            })}
+          </div>
+        )}
+
+        {!loading &&
+          categories.length > 0 &&
+          filteredCategories.length === 0 && (
+            <div className="mt-8 rounded-3xl border border-white/10 bg-white/10 px-6 py-16 text-center">
+              <p className="text-xl font-black">
+                لم نجد فئة بهذا الاسم
+              </p>
+            </div>
+          )}
 
         <div className="mt-12 flex justify-center">
           <button
             type="button"
-            disabled={selected.length !== 6}
-            onClick={() => onNavigate('teams')}
+            disabled={
+              selected.length === 0 ||
+              selected.length !== maxSelections
+            }
+            onClick={continueToTeams}
             className="min-w-64 rounded-2xl bg-yellow-400 px-8 py-4 text-lg font-black text-[#321064] transition enabled:hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-40"
           >
             متابعة لإعداد الفرق
