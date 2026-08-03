@@ -14,6 +14,8 @@ import TeamsSetup from './pages/TeamsSetup';
 import HelpersSetup from './pages/HelpersSetup';
 import GameBoard from './pages/GameBoard';
 import QuestionReady from './pages/QuestionReady';
+import Question from './pages/Question';
+import Answer from './pages/Answer';
 
 type Page =
   | 'home'
@@ -27,7 +29,8 @@ type Page =
   | 'board'
   | 'question-ready'
   | 'results'
-  | 'question';
+  | 'question'
+  | 'answer';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
@@ -53,18 +56,9 @@ export default function App() {
       case 'question-ready':
         return <QuestionReady onNavigate={handleNavigate} />;
       case 'question':
-        return (
-          <div dir="rtl" className="min-h-screen bg-[#2E1065] px-6 pt-32 text-white">
-            <div className="mx-auto max-w-5xl text-center">
-              <h1 className="text-5xl font-black text-[#FACC15]">
-                السؤال الحالي
-              </h1>
-              <p className="mt-5 text-xl text-white/75">
-                عرض نص السؤال والخيارات للفرق...
-              </p>
-            </div>
-          </div>
-        );
+        return <Question onNavigate={handleNavigate} />;
+      case 'answer':
+        return <Answer onNavigate={handleNavigate} />;
       case 'results':
         return (
           <div dir="rtl" className="min-h-screen bg-[#2E1065] px-6 pt-32 text-white">
