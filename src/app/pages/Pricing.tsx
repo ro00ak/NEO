@@ -1,4 +1,3 @@
-import { motion } from 'motion/react';
 import {
   Check,
   Crown,
@@ -65,145 +64,129 @@ const packages = [
   },
 ];
 
-export default function Pricing({
-  onNavigate,
-}: PricingProps) {
+export default function Pricing({ onNavigate }: PricingProps) {
   const { formatPrice, currency } = useCurrency();
 
   const handlePurchase = (packageId: string) => {
-    sessionStorage.setItem(
-      'selectedPackage',
-      packageId,
-    );
-
+    sessionStorage.setItem('selectedPackage', packageId);
     onNavigate('account');
   };
 
   return (
-    <main
+    <section
       dir="rtl"
-      className="min-h-screen bg-gradient-to-b from-[#321064] to-[#17052F] px-5 pb-24 pt-36 text-white"
+      className="bg-[linear-gradient(180deg,#241048_0%,#17052F_100%)] px-3 py-16 text-white sm:px-5 sm:py-20"
     >
-      <div className="mx-auto max-w-[1400px]">
+      <div className="mx-auto max-w-[1280px]">
         <div className="text-center">
-          <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-5 py-2 text-sm font-bold">
+          <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.07] px-4 py-2 text-xs font-bold sm:px-5 sm:text-sm">
             <Sparkles className="h-4 w-4 text-[#FACC15]" />
             اختر الباقة المناسبة
           </span>
 
-          <h1 className="mt-5 text-4xl font-black sm:text-6xl">
+          <h2 className="mt-4 text-3xl font-black sm:text-5xl">
             باقات الميدان
-          </h1>
+          </h2>
 
-          <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-white/65">
-            اختر عدد الألعاب المناسب لك، أو اشترِ اللعبة
-            كاملة واستمتع باللعب بدون حدود.
+          <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-white/58 sm:text-lg">
+            اختر عدد الألعاب المناسب لك، أو اشترِ اللعبة كاملة واستمتع باللعب بدون حدود.
           </p>
         </div>
 
-        <div className="mt-14 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <div className="mx-auto mt-9 grid max-w-[1120px] grid-cols-2 gap-3 sm:mt-12 sm:gap-5 lg:grid-cols-3">
           {packages.map((item, index) => {
             const Icon = item.icon;
+            const isLast = index === packages.length - 1;
 
             return (
-              <motion.article
+              <article
                 key={item.id}
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{
-                  duration: 0.55,
-                  delay: index * 0.08,
-                }}
-                whileHover={{
-                  y: -8,
-                  scale: 1.01,
-                }}
-                className={`relative overflow-hidden rounded-[32px] border p-6 shadow-[0_25px_70px_rgba(0,0,0,0.2)] ${
+                className={`relative flex min-h-[410px] flex-col overflow-hidden rounded-[24px] border p-4 shadow-[0_14px_38px_rgba(0,0,0,0.2)] sm:min-h-[500px] sm:rounded-[30px] sm:p-6 ${
                   item.featured
-                    ? 'border-[#FFD84D] bg-gradient-to-b from-[#5B4310]/80 to-[#2A1A03]/80 shadow-[0_0_45px_rgba(250,204,21,0.22),0_25px_70px_rgba(0,0,0,0.25)]'
+                    ? 'border-[#FFD84D] bg-gradient-to-b from-[#5B4310]/85 to-[#281702]/90]'
                     : item.bestValue
-                    ? 'border-purple-400/60 bg-purple-500/10'
-                    : 'border-white/10 bg-white/[0.07]'
+                    ? 'border-purple-400/55 bg-purple-500/10'
+                    : 'border-white/10 bg-white/[0.065]'
+                } ${
+                  isLast
+                    ? 'col-span-2 mx-auto w-[calc(50%-0.375rem)] min-w-[calc(50%-0.375rem)] lg:col-span-1 lg:w-auto lg:min-w-0'
+                    : ''
                 }`}
               >
                 {item.featured && (
-                  <span className="absolute left-5 top-5 rounded-full border border-yellow-200 bg-gradient-to-b from-[#FFE787] to-[#D99A00] px-4 py-1 text-xs font-black text-[#321064] shadow-[0_4px_0_#8A5C00]">
+                  <span className="absolute left-3 top-3 rounded-full border border-yellow-200 bg-gradient-to-b from-[#FFE787] to-[#D99A00] px-2.5 py-1 text-[9px] font-black text-[#321064] sm:left-5 sm:top-5 sm:px-4 sm:text-xs">
                     الباقة الذهبية
                   </span>
                 )}
 
                 {item.bestValue && (
-                  <span className="absolute left-5 top-5 rounded-full bg-purple-500 px-4 py-1 text-xs font-black text-white">
+                  <span className="absolute left-3 top-3 rounded-full bg-purple-500 px-2.5 py-1 text-[9px] font-black text-white sm:left-5 sm:top-5 sm:px-4 sm:text-xs">
                     أفضل قيمة
                   </span>
                 )}
 
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#FACC15]/15 text-[#FACC15]">
-                  <Icon className="h-8 w-8" />
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#FACC15]/15 text-[#FACC15] sm:h-16 sm:w-16 sm:rounded-2xl">
+                  <Icon className="h-6 w-6 sm:h-8 sm:w-8" />
                 </div>
 
-                <h2 className="mt-6 text-2xl font-black">
+                <h3 className="mt-5 text-lg font-black sm:mt-6 sm:text-2xl">
                   {item.title}
-                </h2>
+                </h3>
 
-                <p className="mt-2 text-sm font-bold text-white/50">
+                <p className="mt-1.5 text-[10px] font-bold text-white/48 sm:mt-2 sm:text-sm">
                   {item.games}
                 </p>
 
-                <div className="mt-6 flex items-end gap-2">
-                  <strong className="text-4xl font-black text-[#FACC15] sm:text-5xl">
-                    {formatPrice(item.price)}
-                  </strong>
-                </div>
+                <strong className="mt-5 block break-words text-2xl font-black leading-tight text-[#FACC15] sm:mt-6 sm:text-4xl">
+                  {formatPrice(item.price)}
+                </strong>
 
-                <p className="mt-3 text-sm font-bold text-white/45">
-                  السعر معروض بعملة {currency.name}
+                <p className="mt-2 text-[9px] font-bold leading-4 text-white/42 sm:mt-3 sm:text-sm">
+                  السعر بعملة {currency.name}
                 </p>
 
-                <p className="mt-6 min-h-14 leading-7 text-white/65">
+                <p className="mt-5 min-h-12 text-[11px] leading-5 text-white/62 sm:mt-6 sm:min-h-14 sm:text-base sm:leading-7">
                   {item.description}
                 </p>
 
-                <ul className="mt-6 space-y-3">
-                  <li className="flex items-center gap-3 text-sm font-bold text-white/75">
-                    <Check className="h-5 w-5 text-[#FACC15]" />
-                    الوصول إلى جميع الفئات
-                  </li>
-
-                  <li className="flex items-center gap-3 text-sm font-bold text-white/75">
-                    <Check className="h-5 w-5 text-[#FACC15]" />
-                    جميع وسائل المساعدة
-                  </li>
-
-                  <li className="flex items-center gap-3 text-sm font-bold text-white/75">
-                    <Check className="h-5 w-5 text-[#FACC15]" />
-                    حفظ النتائج داخل الحساب
-                  </li>
+                <ul className="mt-5 space-y-2.5 sm:mt-6 sm:space-y-3">
+                  {[
+                    'الوصول إلى جميع الفئات',
+                    'جميع وسائل المساعدة',
+                    'حفظ النتائج داخل الحساب',
+                  ].map((feature) => (
+                    <li
+                      key={feature}
+                      className="flex items-start gap-1.5 text-[10px] font-bold leading-5 text-white/72 sm:gap-3 sm:text-sm"
+                    >
+                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#FACC15] sm:h-5 sm:w-5" />
+                      {feature}
+                    </li>
+                  ))}
                 </ul>
 
                 <button
                   type="button"
                   onClick={() => handlePurchase(item.id)}
-                  className={`mt-8 h-14 w-full rounded-2xl font-black transition hover:-translate-y-1 ${
+                  className={`mt-auto h-12 w-full rounded-xl text-sm font-black transition active:scale-[0.98] sm:h-14 sm:rounded-2xl sm:text-base ${
                     item.featured || item.bestValue
-                      ? 'bg-[#FACC15] text-[#321064]'
+                      ? 'bg-[#FACC15] text-[#321064] shadow-[0_4px_0_#8B6500]'
                       : 'border border-[#FACC15]/30 bg-[#FACC15]/10 text-[#FACC15]'
                   }`}
                 >
                   اشتر الآن
                 </button>
-              </motion.article>
+              </article>
             );
           })}
         </div>
 
-        <div className="mx-auto mt-12 max-w-3xl rounded-3xl border border-white/10 bg-white/[0.06] p-6 text-center">
-          <p className="leading-8 text-white/65">
-            بعد اختيار الباقة سيتم نقلك إلى حسابك لإكمال
-            الدفع. ربط بوابة الدفع سيتم في الخطوة التالية.
+        <div className="mx-auto mt-8 max-w-3xl rounded-2xl border border-white/10 bg-white/[0.05] p-4 text-center sm:mt-10 sm:rounded-3xl sm:p-6">
+          <p className="text-xs leading-6 text-white/62 sm:text-base sm:leading-8">
+            بعد اختيار الباقة سيتم نقلك إلى حسابك لإكمال الدفع.
           </p>
         </div>
       </div>
-    </main>
+    </section>
   );
 }
