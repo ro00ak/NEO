@@ -20,10 +20,10 @@ export default function Header({ onNavigate, onCartClick }: HeaderProps) {
   const { user, logout, isAdmin } = useAuth();
 
   const navItems = [
-    { key: 'nav.home', page: 'home' },
-    { key: 'nav.shop', page: 'shop' },
-    { key: 'nav.about', page: 'about' },
-    { key: 'nav.contact', page: 'contact' },
+    { key: 'الرئيسية', page: 'home' },
+    { key: 'ابدأ اللعب', page: 'play' },
+    { key: 'طريقة اللعب', page: 'how' },
+    { key: 'التصنيفات', page: 'leaderboard' },
   ];
 
   // Close user menu when clicking outside
@@ -58,11 +58,13 @@ export default function Header({ onNavigate, onCartClick }: HeaderProps) {
             onClick={() => onNavigate('home')}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.98 }}
-            className="text-2xl font-bold tracking-wider cursor-pointer"
+            className="flex items-center cursor-pointer"
           >
-            <span className="bg-gradient-to-r from-black to-gray-600 dark:from-white dark:to-gray-400 bg-clip-text text-transparent">
-              LUXURY
-            </span>
+            <img
+              src="/almaydan-logo.png"
+              alt="الميدان يا حميدان"
+              className="h-12 w-auto"
+            />
           </motion.button>
 
           {/* Desktop Navigation */}
@@ -79,7 +81,7 @@ export default function Header({ onNavigate, onCartClick }: HeaderProps) {
                 whileTap={{ scale: 0.98 }}
                 className="relative text-sm tracking-wide hover:text-black dark:hover:text-white transition-colors group"
               >
-                {t(item.key)}
+                {item.key}
                 <motion.span
                   className="absolute -bottom-1 left-0 w-0 h-[2px] bg-black dark:bg-white group-hover:w-full transition-all duration-300"
                 />
@@ -271,7 +273,7 @@ export default function Header({ onNavigate, onCartClick }: HeaderProps) {
                 whileTap={{ scale: 0.98 }}
                 className="block py-3 text-sm hover:text-black dark:hover:text-white transition-colors w-full text-left"
               >
-                {t(item.key)}
+                {item.key}
               </motion.button>
             ))}
           </motion.nav>
