@@ -110,24 +110,26 @@ export function AuthProvider({
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        if (!session?.user) {
-          setUser(null);
-          setLoading(false);
-          return;
-        }
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session?.user) {
+        setUser(null);
+        setLoading(false);
+        return;
+      }
 
+      setTimeout(async () => {
         const currentUser = await getProfile(
           session.user.id,
           session.user.email || '',
           session.user.user_metadata?.full_name,
         );
 
-        setUser(currentUser);
-        setLoading(false);
-      },
-    );
+        if (isMounted) {
+          setUser(currentUser);
+          setLoading(false);
+        }
+      }, 0);
+    });
 
     return () => {
       isMounted = false;
