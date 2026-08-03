@@ -93,9 +93,6 @@ export default function Login({ onSuccess }: LoginProps) {
         formData.name.trim(),
         email,
         password,
-        'user',
-        '',
-        '',
       );
 
       if (!success) {
@@ -104,8 +101,14 @@ export default function Login({ onSuccess }: LoginProps) {
       }
 
       onSuccess('user');
-    } catch {
-      setError('حدث خطأ غير متوقع. حاول مرة أخرى.');
+    } catch (error) {
+      console.error('Auth error:', error);
+
+      setError(
+        error instanceof Error
+          ? error.message
+          : 'حدث خطأ غير متوقع. حاول مرة أخرى.',
+      );
     } finally {
       setLoading(false);
     }
