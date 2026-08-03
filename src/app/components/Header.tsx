@@ -56,11 +56,13 @@ export default function Header({ onNavigate }: HeaderProps) {
             whileTap={{ scale: 0.98 }}
             className="flex items-center cursor-pointer"
           >
-            <img
-              src="/almaydan-logo.png"
-              alt="الميدان يا حميدان"
-              className="h-12 w-auto"
-            />
+            <div className="flex items-center justify-center bg-transparent p-0">
+              <img
+                src="/almaydan-logo.png?v=5"
+                alt="الميدان يا حميدان"
+                className="h-14 w-auto object-contain"
+              />
+            </div>
           </motion.button>
 
           {/* Desktop Navigation */}
