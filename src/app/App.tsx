@@ -35,7 +35,9 @@ type Page =
   | 'how'
   | 'leaderboard'
   | 'login'
-  | 'admin';
+  | 'admin'
+  | 'account'
+  | 'helpers-info';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
@@ -235,6 +237,34 @@ export default function App() {
               </div>
             </div>
           </main>
+        );
+
+      case 'account':
+        return (
+          <div
+            dir="rtl"
+            className="min-h-screen bg-[#1D073D] px-6 pt-36 text-white"
+          >
+            <div className="mx-auto max-w-5xl">
+              <h1 className="text-4xl font-black text-[#FACC15]">
+                حسابي
+              </h1>
+
+              <p className="mt-4 text-white/60">
+                سيتم عرض بيانات الحساب والألعاب والنتائج هنا.
+              </p>
+            </div>
+          </div>
+        );
+
+      case 'helpers-info':
+        return (
+          <div
+            dir="rtl"
+            className="min-h-screen bg-[#1D073D] pt-24 text-white"
+          >
+            <HelpersShowcase />
+          </div>
         );
 
       case 'login':
