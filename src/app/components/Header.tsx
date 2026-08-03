@@ -7,6 +7,11 @@ import {
 } from 'lucide-react';
 
 import { useAuth } from '../contexts/AuthContext';
+import {
+  currencies,
+  useCurrency,
+  type CurrencyCode,
+} from '../contexts/CurrencyContext';
 
 interface HeaderProps {
   onNavigate: (page: string) => void;
@@ -36,6 +41,7 @@ export default function Header({
   onNavigate,
 }: HeaderProps) {
   const { user, isAdmin } = useAuth();
+  const { currency, setCurrencyCode } = useCurrency();
   const [mobileMenuOpen, setMobileMenuOpen] =
     useState(false);
 
@@ -74,8 +80,44 @@ export default function Header({
       >
         <div className="pointer-events-none absolute inset-x-16 top-0 h-[2px] bg-gradient-to-r from-transparent via-purple-400/50 to-transparent" />
 
-        {/* الحساب (يسار القائمة في الديسكتوب) */}
+        {/* الحساب واختيار العملة (يسار القائمة في الديسكتوب) */}
         <div className="hidden items-center gap-3 lg:flex">
+          <div className="relative">
+            <select
+              value={currency.code}
+              onChange={(event) =>
+                setCurrencyCode(
+                  event.target.value as CurrencyCode,
+                )
+              }
+              aria-label="اختيار العملة"
+              className="
+                h-11 cursor-pointer appearance-none rounded-2xl
+                border-2 border-[#5964BD]
+                bg-gradient-to-b from-[#303873] to-[#222858]
+                pr-4 pl-10 text-sm font-black text-white
+                shadow-[0_4px_0_#151A3D]
+                outline-none transition
+                hover:-translate-y-1
+                hover:border-[#FACC15]
+              "
+            >
+              {currencies.map((item) => (
+                <option
+                  key={item.code}
+                  value={item.code}
+                  className="bg-[#222858] text-white"
+                >
+                  {item.code} — {item.name}
+                </option>
+              ))}
+            </select>
+
+            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-[#FACC15]">
+              ▼
+            </span>
+          </div>
+
           <button
             type="button"
             onClick={openAccount}
@@ -133,7 +175,7 @@ export default function Header({
           )}
         </div>
 
-        {/* روابط التنقل في المنتصف (أو الوسط) */}
+        {/* روابط التنقل في المنتصف */}
         <nav className="hidden items-center gap-2 lg:flex">
           {navigationItems.map((item) => (
             <button
@@ -216,6 +258,33 @@ export default function Header({
               </button>
             ))}
           </nav>
+
+          {/* اختيار العملة في الجوال */}
+          <div className="mt-4 border-t border-white/10 pt-4">
+            <p className="mb-2 text-sm font-bold text-white/55">
+              العملة
+            </p>
+
+            <select
+              value={currency.code}
+              onChange={(event) =>
+                setCurrencyCode(
+                  event.target.value as CurrencyCode,
+                )
+              }
+              className="h-14 w-full rounded-2xl border-2 border-[#5964BD] bg-[#272C60] px-4 font-black text-white outline-none"
+            >
+              {currencies.map((item) => (
+                <option
+                  key={item.code}
+                  value={item.code}
+                  className="bg-[#272C60]"
+                >
+                  {item.name} — {item.symbol}
+                </option>
+              ))}
+            </select>
+          </div>
 
           <div className="mt-4 grid grid-cols-2 gap-3 border-t border-white/10 pt-4">
             <button
