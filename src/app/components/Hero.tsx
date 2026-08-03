@@ -70,7 +70,7 @@ export default function Hero({ onNavigate }: HeroProps) {
           <div className="flex flex-col justify-center gap-4 sm:flex-row lg:justify-start">
             <motion.button
               type="button"
-              onClick={() => onNavigate('login')}
+              onClick={() => onNavigate('play')}
               whileHover={{ scale: 1.04, y: -3 }}
               whileTap={{ scale: 0.96 }}
               className="inline-flex items-center justify-center gap-3 rounded-2xl bg-[#FACC15] px-8 py-4 text-lg font-black text-[#2E1065] shadow-[0_15px_40px_rgba(250,204,21,0.25)]"
