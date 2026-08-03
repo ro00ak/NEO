@@ -83,11 +83,7 @@ export default function Hero({
             </span>
           </h1>
 
-          <p className="mx-auto mb-10 max-w-2xl text-lg leading-9 text-white/75 sm:text-xl lg:mx-0">
-            اختر الفئات، كوّن الفرق، وابدأ التحدي مع
-            أصحابك في تجربة مليئة بالأسئلة والحماس
-            والمنافسة.
-          </p>
+         
 
           <div className="flex flex-col justify-center gap-4 sm:flex-row lg:justify-start">
             <motion.button
