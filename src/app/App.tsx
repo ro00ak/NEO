@@ -13,6 +13,7 @@ import Footer from './components/Footer';
 
 import Login from './pages/Login';
 import AdminDashboard from './pages/AdminDashboard';
+import Account from './pages/Account';
 
 import GameSetup from './pages/GameSetup';
 import TeamsSetup from './pages/TeamsSetup';
@@ -240,22 +241,7 @@ export default function App() {
         );
 
       case 'account':
-        return (
-          <div
-            dir="rtl"
-            className="min-h-screen bg-[#1D073D] px-6 pt-36 text-white"
-          >
-            <div className="mx-auto max-w-5xl">
-              <h1 className="text-4xl font-black text-[#FACC15]">
-                حسابي
-              </h1>
-
-              <p className="mt-4 text-white/60">
-                سيتم عرض بيانات الحساب والألعاب والنتائج هنا.
-              </p>
-            </div>
-          </div>
-        );
+        return <Account onNavigate={handleNavigate} />;
 
       case 'helpers-info':
         return (
