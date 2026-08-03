@@ -12,6 +12,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import GameSetup from './pages/GameSetup';
 import TeamsSetup from './pages/TeamsSetup';
 import HelpersSetup from './pages/HelpersSetup';
+import GameBoard from './pages/GameBoard';
 
 type Page =
   | 'home'
@@ -22,7 +23,9 @@ type Page =
   | 'admin'
   | 'teams'
   | 'helpers'
-  | 'board';
+  | 'board'
+  | 'question-ready'
+  | 'results';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
@@ -44,14 +47,29 @@ export default function App() {
       case 'helpers':
         return <HelpersSetup onNavigate={handleNavigate} />;
       case 'board':
+        return <GameBoard onNavigate={handleNavigate} />;
+      case 'question-ready':
         return (
           <div dir="rtl" className="min-h-screen bg-[#2E1065] px-6 pt-32 text-white">
             <div className="mx-auto max-w-5xl text-center">
               <h1 className="text-5xl font-black text-[#FACC15]">
-                لوحة اللعبة
+                السؤال جاهز
               </h1>
               <p className="mt-5 text-xl text-white/75">
-                جاري إعداد لوحة المنافسة والأسئلة...
+                جاري عرض تفاصيل السؤال والنقاط...
+              </p>
+            </div>
+          </div>
+        );
+      case 'results':
+        return (
+          <div dir="rtl" className="min-h-screen bg-[#2E1065] px-6 pt-32 text-white">
+            <div className="mx-auto max-w-5xl text-center">
+              <h1 className="text-5xl font-black text-[#FACC15]">
+                النتائج النهائية
+              </h1>
+              <p className="mt-5 text-xl text-white/75">
+                تعرف على الفريق الفائز ومجموع النقاط.
               </p>
             </div>
           </div>
