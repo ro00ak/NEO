@@ -44,11 +44,8 @@ export default function Header({ onNavigate }: HeaderProps) {
     <motion.header
       initial={{ y: -100 }}
       animate={{ y: 0 }}
-      className="fixed top-0 left-0 right-0 z-50"
+      className="fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-[#14001F] text-white"
     >
-      {/* Glassmorphism Background */}
-      <div className="absolute inset-0 bg-white/70 dark:bg-black/70 backdrop-blur-xl border-b border-black/10 dark:border-white/10" />
-
       <div className="relative max-w-[1400px] mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
@@ -78,11 +75,11 @@ export default function Header({ onNavigate }: HeaderProps) {
                 transition={{ delay: index * 0.1 }}
                 whileHover={{ y: -2 }}
                 whileTap={{ scale: 0.98 }}
-                className="relative text-sm tracking-wide hover:text-black dark:hover:text-white transition-colors group"
+                className="relative text-sm tracking-wide text-white/80 hover:text-white transition-colors group"
               >
                 {item.key}
                 <motion.span
-                  className="absolute -bottom-1 left-0 w-0 h-[2px] bg-black dark:bg-white group-hover:w-full transition-all duration-300"
+                  className="absolute -bottom-1 left-0 w-0 h-[2px] bg-white group-hover:w-full transition-all duration-300"
                 />
               </motion.button>
             ))}
@@ -98,7 +95,7 @@ export default function Header({ onNavigate }: HeaderProps) {
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                  className="p-2 rounded-full hover:bg-white/10 transition-colors text-white"
                 >
                   <User className="w-5 h-5" />
                 </motion.button>
@@ -108,13 +105,13 @@ export default function Header({ onNavigate }: HeaderProps) {
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="absolute right-0 mt-2 w-48 p-2 rounded-2xl bg-white/90 dark:bg-black/90 backdrop-blur-xl border border-black/10 dark:border-white/10 shadow-lg z-50"
+                    className="absolute right-0 mt-2 w-48 p-2 rounded-2xl bg-[#14001F]/95 backdrop-blur-xl border border-white/10 shadow-lg z-50 text-white"
                   >
-                    <div className="px-4 py-3 border-b border-black/10 dark:border-white/10">
-                      <p className="text-sm font-semibold">{user.name}</p>
-                      <p className="text-xs text-gray-600 dark:text-gray-400">{user.email}</p>
+                    <div className="px-4 py-3 border-b border-white/10">
+                      <p className="text-sm font-semibold text-white">{user.name}</p>
+                      <p className="text-xs text-white/70">{user.email}</p>
                       {user.role === 'wholesale' && (
-                        <span className="inline-block mt-1 px-2 py-0.5 bg-green-500/20 text-green-600 dark:text-green-400 rounded text-xs">
+                        <span className="inline-block mt-1 px-2 py-0.5 bg-green-500/20 text-green-400 rounded text-xs">
                           {language === 'ar' ? 'جملة' : 'Wholesale'}
                         </span>
                       )}
@@ -127,7 +124,7 @@ export default function Header({ onNavigate }: HeaderProps) {
                           onNavigate('admin');
                           setShowUserMenu(false);
                         }}
-                        className="w-full px-4 py-2 text-left text-sm hover:bg-black/5 dark:hover:bg-white/5 rounded-xl flex items-center gap-2"
+                        className="w-full px-4 py-2 text-right text-sm hover:bg-white/10 rounded-xl flex items-center gap-2 text-white"
                       >
                         <Settings className="w-4 h-4" />
                         {language === 'ar' ? 'لوحة التحكم' : 'Dashboard'}
@@ -141,7 +138,7 @@ export default function Header({ onNavigate }: HeaderProps) {
                           onNavigate('wholesale-dashboard');
                           setShowUserMenu(false);
                         }}
-                        className="w-full px-4 py-2 text-left text-sm hover:bg-black/5 dark:hover:bg-white/5 rounded-xl flex items-center gap-2"
+                        className="w-full px-4 py-2 text-right text-sm hover:bg-white/10 rounded-xl flex items-center gap-2 text-white"
                       >
                         <Settings className="w-4 h-4" />
                         {language === 'ar' ? 'لوحة الجملة' : 'Wholesale Dashboard'}
@@ -155,7 +152,7 @@ export default function Header({ onNavigate }: HeaderProps) {
                           onNavigate('customer-dashboard');
                           setShowUserMenu(false);
                         }}
-                        className="w-full px-4 py-2 text-left text-sm hover:bg-black/5 dark:hover:bg-white/5 rounded-xl flex items-center gap-2"
+                        className="w-full px-4 py-2 text-right text-sm hover:bg-white/10 rounded-xl flex items-center gap-2 text-white"
                       >
                         <User className="w-4 h-4" />
                         {language === 'ar' ? 'حسابي' : 'My Account'}
@@ -169,7 +166,7 @@ export default function Header({ onNavigate }: HeaderProps) {
                         setShowUserMenu(false);
                         onNavigate('home');
                       }}
-                      className="w-full px-4 py-2 text-left text-sm hover:bg-black/5 dark:hover:bg-white/5 rounded-xl flex items-center gap-2 text-red-600 dark:text-red-400"
+                      className="w-full px-4 py-2 text-right text-sm hover:bg-white/10 rounded-xl flex items-center gap-2 text-red-400"
                     >
                       <LogOut className="w-4 h-4" />
                       {language === 'ar' ? 'تسجيل الخروج' : 'Logout'}
@@ -183,7 +180,7 @@ export default function Header({ onNavigate }: HeaderProps) {
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => onNavigate('login')}
-                className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                className="p-2 rounded-full hover:bg-white/10 transition-colors text-white"
               >
                 <User className="w-5 h-5" />
               </motion.button>
@@ -194,7 +191,7 @@ export default function Header({ onNavigate }: HeaderProps) {
               type="button"
               whileTap={{ scale: 0.95 }}
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden p-2"
+              className="md:hidden p-2 text-white"
             >
               {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </motion.button>
@@ -207,7 +204,7 @@ export default function Header({ onNavigate }: HeaderProps) {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden mt-4 pb-4"
+            className="md:hidden mt-4 pb-4 border-t border-white/10 pt-4"
           >
             {navItems.map((item, index) => (
               <motion.button
@@ -221,7 +218,7 @@ export default function Header({ onNavigate }: HeaderProps) {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.1 }}
                 whileTap={{ scale: 0.98 }}
-                className="block py-3 text-sm hover:text-black dark:hover:text-white transition-colors w-full text-left"
+                className="block py-3 text-sm text-white/80 hover:text-white transition-colors w-full text-right"
               >
                 {item.key}
               </motion.button>
