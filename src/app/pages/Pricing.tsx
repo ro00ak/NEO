@@ -45,7 +45,7 @@ const packages = [
     saudiPrice: 'حوالي 30 ر.س',
     description: 'باقة مناسبة للمجموعات والجلسات.',
     icon: Star,
-    featured: true,
+    featured: false,
     bestValue: false,
   },
   {
@@ -64,12 +64,12 @@ const packages = [
     id: 'full-game',
     title: 'اللعبة كاملة',
     games: 'لعب غير محدود',
-    price: '8.000',
+    price: '7.000',
     currency: 'ر.ع',
-    saudiPrice: 'حوالي 80 ر.س',
+    saudiPrice: 'حوالي 70 ر.س',
     description: 'اشترِ اللعبة كاملة والعب بدون حدود.',
     icon: Crown,
-    featured: false,
+    featured: true,
     bestValue: false,
   },
 ];
@@ -127,15 +127,15 @@ export default function Pricing({
                 }}
                 className={`relative overflow-hidden rounded-[32px] border p-6 shadow-[0_25px_70px_rgba(0,0,0,0.2)] ${
                   item.featured
-                    ? 'border-[#FACC15] bg-[#FACC15]/10'
+                    ? 'border-[#FFD84D] bg-gradient-to-b from-[#5B4310]/80 to-[#2A1A03]/80 shadow-[0_0_45px_rgba(250,204,21,0.22),0_25px_70px_rgba(0,0,0,0.25)]'
                     : item.bestValue
                     ? 'border-purple-400/60 bg-purple-500/10'
                     : 'border-white/10 bg-white/[0.07]'
                 }`}
               >
                 {item.featured && (
-                  <span className="absolute left-5 top-5 rounded-full bg-[#FACC15] px-4 py-1 text-xs font-black text-[#321064]">
-                    الأكثر طلبًا
+                  <span className="absolute left-5 top-5 rounded-full border border-yellow-200 bg-gradient-to-b from-[#FFE787] to-[#D99A00] px-4 py-1 text-xs font-black text-[#321064] shadow-[0_4px_0_#8A5C00]">
+                    الباقة الذهبية
                   </span>
                 )}
 
