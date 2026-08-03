@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 
 import { useAuth } from '../contexts/AuthContext';
+import CategoriesManager from './admin/CategoriesManager';
 
 type AdminPage =
   | 'dashboard'
@@ -281,14 +282,7 @@ function AdminContent({
       );
 
     case 'categories':
-      return (
-        <EmptySection
-          icon={BookOpen}
-          title="إدارة الفئات"
-          description="من هنا ستضيف الفئات، اسم الفئة، الوصف، الصورة، اللون وحالة التفعيل."
-          buttonLabel="إضافة فئة جديدة"
-        />
-      );
+      return <CategoriesManager />;
 
     case 'questions':
       return (
