@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { Menu, X, User, LogOut, Settings } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -28,12 +28,17 @@ export default function Header({ onNavigate }: HeaderProps) {
     }
   };
 
-  useState(() => {
-    if (showUserMenu) {
-      document.addEventListener('click', handleClickOutside);
-      return () => document.removeEventListener('click', handleClickOutside);
+  useEffect(() => {
+    if (!showUserMenu) {
+      return;
     }
-  });
+
+    document.addEventListener('click', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [showUserMenu]);
 
   return (
     <motion.header
