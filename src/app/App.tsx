@@ -10,6 +10,7 @@ import Footer from './components/Footer';
 import Login from './pages/Login';
 import AdminDashboard from './pages/AdminDashboard';
 import GameSetup from './pages/GameSetup';
+import TeamsSetup from './pages/TeamsSetup';
 
 type Page =
   | 'home'
@@ -18,7 +19,8 @@ type Page =
   | 'leaderboard'
   | 'login'
   | 'admin'
-  | 'teams';
+  | 'teams'
+  | 'helpers';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
@@ -35,6 +37,21 @@ export default function App() {
         return <Hero onNavigate={handleNavigate} />;
       case 'play':
         return <GameSetup onNavigate={handleNavigate} />;
+      case 'teams':
+        return <TeamsSetup onNavigate={handleNavigate} />;
+      case 'helpers':
+        return (
+          <div dir="rtl" className="min-h-screen bg-[#2E1065] px-6 pt-32 text-white">
+            <div className="mx-auto max-w-5xl text-center">
+              <h1 className="text-5xl font-black text-[#FACC15]">
+                وسائل المساعدة
+              </h1>
+              <p className="mt-5 text-xl text-white/75">
+                اختر وسائل المساعدة المتاحة للفرق أثناء اللعب.
+              </p>
+            </div>
+          </div>
+        );
       case 'how':
         return (
           <div dir="rtl" className="min-h-screen bg-[#2E1065] px-6 pt-32 text-white">
