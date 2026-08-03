@@ -60,6 +60,7 @@ export default function App() {
           <>
             <Hero onNavigate={handleNavigate} />
             <HelpersShowcase />
+            <Pricing onNavigate={handleNavigate} />
           </>
         );
 
@@ -279,6 +280,7 @@ export default function App() {
           <>
             <Hero onNavigate={handleNavigate} />
             <HelpersShowcase />
+            <Pricing onNavigate={handleNavigate} />
           </>
         );
     }
