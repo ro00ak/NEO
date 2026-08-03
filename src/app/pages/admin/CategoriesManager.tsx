@@ -1,7 +1,14 @@
-import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
+import {
+  ChangeEvent,
+  FormEvent,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { motion } from 'motion/react';
 import {
   Edit,
+  FolderPlus,
   ImagePlus,
   Loader2,
   Plus,
@@ -16,19 +23,53 @@ interface Category {
   id: string;
   name: string;
   image_url: string | null;
+  section_name: string;
   is_active: boolean;
   created_at: string;
 }
 
+const defaultSections = [
+  'أجدد الفئات',
+  'عام',
+  'إسلامي',
+  'دول',
+  'حروف',
+  'كلمات',
+  'تفكير',
+  'بنات',
+  'فن خليجي',
+  'مسرح',
+  'فن عربي',
+  'أغاني',
+  'فن أجنبي',
+  'فن تركي',
+  'كرة قدم',
+  'رياضة',
+  'أنيمي',
+  'ألعاب',
+  'السعودية',
+  'عمان',
+  'الكويت',
+  'قطر',
+  'الإمارات',
+  'البحرين',
+];
+
 export default function CategoriesManager() {
   const [categories, setCategories] = useState<Category[]>([]);
-  const [name, setName] = useState('');
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState('');
+  const [showForm, setShowForm] = useState(false);
   const [editingCategory, setEditingCategory] =
     useState<Category | null>(null);
 
-  const [showForm, setShowForm] = useState(false);
+  const [name, setName] = useState('');
+  const [sectionName, setSectionName] = useState('');
+  const [customSection, setCustomSection] = useState('');
+  const [useCustomSection, setUseCustomSection] = useState(false);
+
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState('');
+
+  const [filterSection, setFilterSection] = useState('all');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -43,7 +84,9 @@ export default function CategoriesManager() {
 
     const { data, error: fetchError } = await supabase
       .from('categories')
-      .select('*')
+      .select(
+        'id, name, image_url, section_name, is_active, created_at',
+      )
       .order('created_at', { ascending: false });
 
     if (fetchError) {
@@ -52,12 +95,52 @@ export default function CategoriesManager() {
       return;
     }
 
-    setCategories(data || []);
+    setCategories((data || []) as Category[]);
     setLoading(false);
   };
 
+  const sectionOptions = useMemo(() => {
+    const savedSections = categories
+      .map((category) => category.section_name)
+      .filter(Boolean);
+
+    return Array.from(
+      new Set([...defaultSections, ...savedSections]),
+    );
+  }, [categories]);
+
+  const filteredCategories = useMemo(() => {
+    if (filterSection === 'all') {
+      return categories;
+    }
+
+    return categories.filter(
+      (category) => category.section_name === filterSection,
+    );
+  }, [categories, filterSection]);
+
+  const groupedCategories = useMemo(() => {
+    const groups = new Map<string, Category[]>();
+
+    filteredCategories.forEach((category) => {
+      const section = category.section_name || 'غير مصنف';
+      const current = groups.get(section) || [];
+      current.push(category);
+      groups.set(section, current);
+    });
+
+    return Array.from(groups.entries());
+  }, [filteredCategories]);
+
   const resetForm = () => {
+    if (imagePreview.startsWith('blob:')) {
+      URL.revokeObjectURL(imagePreview);
+    }
+
     setName('');
+    setSectionName('');
+    setCustomSection('');
+    setUseCustomSection(false);
     setImageFile(null);
     setImagePreview('');
     setEditingCategory(null);
@@ -65,14 +148,17 @@ export default function CategoriesManager() {
     setError('');
   };
 
+  const openNewCategoryForm = () => {
+    resetForm();
+    setShowForm(true);
+  };
+
   const handleImageChange = (
     event: ChangeEvent<HTMLInputElement>,
   ) => {
     const file = event.target.files?.[0];
 
-    if (!file) {
-      return;
-    }
+    if (!file) return;
 
     if (!file.type.startsWith('image/')) {
       setError('اختر ملف صورة فقط.');
@@ -82,6 +168,10 @@ export default function CategoriesManager() {
     if (file.size > 5 * 1024 * 1024) {
       setError('حجم الصورة يجب ألا يتجاوز 5 ميجابايت.');
       return;
+    }
+
+    if (imagePreview.startsWith('blob:')) {
+      URL.revokeObjectURL(imagePreview);
     }
 
     setImageFile(file);
@@ -97,7 +187,8 @@ export default function CategoriesManager() {
     const extension =
       imageFile.name.split('.').pop()?.toLowerCase() || 'jpg';
 
-    const filePath = `categories/${crypto.randomUUID()}.${extension}`;
+    const filePath =
+      `categories/${crypto.randomUUID()}.${extension}`;
 
     const { error: uploadError } = await supabase.storage
       .from('game-media')
@@ -122,13 +213,18 @@ export default function CategoriesManager() {
   ) => {
     event.preventDefault();
 
-    if (!name.trim()) {
+    const cleanName = name.trim();
+    const selectedSection = useCustomSection
+      ? customSection.trim()
+      : sectionName.trim();
+
+    if (!cleanName) {
       setError('اكتب اسم الفئة.');
       return;
     }
 
-    if (!imageFile && !editingCategory?.image_url) {
-      setError('ارفع صورة للفئة.');
+    if (!selectedSection) {
+      setError('اختر القسم أو أضف قسمًا جديدًا.');
       return;
     }
 
@@ -138,14 +234,18 @@ export default function CategoriesManager() {
     try {
       const imageUrl = await uploadImage();
 
+      const categoryData = {
+        name: cleanName,
+        section_name: selectedSection,
+        image_url: imageUrl,
+        is_active: true,
+        updated_at: new Date().toISOString(),
+      };
+
       if (editingCategory) {
         const { error: updateError } = await supabase
           .from('categories')
-          .update({
-            name: name.trim(),
-            image_url: imageUrl,
-            updated_at: new Date().toISOString(),
-          })
+          .update(categoryData)
           .eq('id', editingCategory.id);
 
         if (updateError) {
@@ -154,11 +254,7 @@ export default function CategoriesManager() {
       } else {
         const { error: insertError } = await supabase
           .from('categories')
-          .insert({
-            name: name.trim(),
-            image_url: imageUrl,
-            is_active: true,
-          });
+          .insert(categoryData);
 
         if (insertError) {
           throw new Error(insertError.message);
@@ -181,20 +277,27 @@ export default function CategoriesManager() {
   const handleEdit = (category: Category) => {
     setEditingCategory(category);
     setName(category.name);
-    setImagePreview(category.image_url || '');
+    setSectionName(category.section_name);
+    setUseCustomSection(
+      !defaultSections.includes(category.section_name),
+    );
+    setCustomSection(
+      defaultSections.includes(category.section_name)
+        ? ''
+        : category.section_name,
+    );
     setImageFile(null);
+    setImagePreview(category.image_url || '');
     setShowForm(true);
     setError('');
   };
 
   const handleDelete = async (category: Category) => {
     const confirmed = window.confirm(
-      `هل أنت متأكد من حذف فئة "${category.name}"؟`,
+      `هل أنت متأكد من حذف فئة "${category.name}"؟ سيتم حذف جولات وأسئلة الفئة المرتبطة بها.`,
     );
 
-    if (!confirmed) {
-      return;
-    }
+    if (!confirmed) return;
 
     const { error: deleteError } = await supabase
       .from('categories')
@@ -232,16 +335,13 @@ export default function CategoriesManager() {
         <div>
           <h2 className="text-2xl font-black">إدارة الفئات</h2>
           <p className="mt-2 text-sm text-white/50">
-            أضف الفئات التي ستظهر عند بدء اللعبة.
+            أضف الفئة وصورتها، ثم اختر القسم الذي ستظهر تحته في صفحة اللعب.
           </p>
         </div>
 
         <button
           type="button"
-          onClick={() => {
-            resetForm();
-            setShowForm(true);
-          }}
+          onClick={openNewCategoryForm}
           className="inline-flex items-center gap-2 rounded-2xl bg-[#FACC15] px-5 py-3 font-black text-[#321064]"
         >
           <Plus className="h-5 w-5" />
@@ -249,88 +349,155 @@ export default function CategoriesManager() {
         </button>
       </div>
 
-      {error && (
+      {error && !showForm && (
         <div className="mb-5 rounded-2xl border border-red-400/30 bg-red-500/15 px-4 py-3 text-sm font-bold text-red-200">
           {error}
         </div>
       )}
 
-      {showForm && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4"
+      <div className="mb-7 rounded-2xl border border-white/10 bg-white/10 p-4">
+        <label className="block text-sm font-bold text-white/60">
+          عرض فئات قسم معين
+        </label>
+
+        <select
+          value={filterSection}
+          onChange={(event) => setFilterSection(event.target.value)}
+          className="mt-3 h-12 w-full rounded-xl border border-white/15 bg-[#2B1250] px-4 font-bold outline-none sm:max-w-sm"
         >
+          <option value="all">جميع الأقسام</option>
+          {sectionOptions.map((section) => (
+            <option key={section} value={section}>{section}</option>
+          ))}
+        </select>
+      </div>
+
+      {showForm && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-black/80 p-4">
           <motion.form
-            initial={{ scale: 0.96, y: 20 }}
-            animate={{ scale: 1, y: 0 }}
+            initial={{ opacity: 0, scale: 0.97, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
             onSubmit={handleSubmit}
-            className="w-full max-w-lg rounded-[30px] border border-white/10 bg-[#2B1250] p-6 shadow-2xl"
+            className="my-8 w-full max-w-2xl rounded-[30px] border border-white/10 bg-[#2B1250] p-6 shadow-2xl"
           >
             <div className="flex items-center justify-between">
-              <h3 className="text-2xl font-black">
-                {editingCategory
-                  ? 'تعديل الفئة'
-                  : 'إضافة فئة جديدة'}
-              </h3>
+              <div>
+                <h3 className="text-2xl font-black">
+                  {editingCategory ? 'تعديل الفئة' : 'إضافة فئة جديدة'}
+                </h3>
+                <p className="mt-2 text-sm text-white/45">
+                  اكتب الاسم، اختر القسم، ثم ارفع صورة الفئة.
+                </p>
+              </div>
 
-              <button
-                type="button"
-                onClick={resetForm}
-                className="rounded-xl bg-white/10 p-2"
-              >
+              <button type="button" onClick={resetForm} className="rounded-xl bg-white/10 p-2">
                 <X className="h-5 w-5" />
               </button>
             </div>
 
-            <label className="mt-6 block">
-              <span className="mb-2 block text-sm font-bold text-white/70">
-                اسم الفئة
-              </span>
+            {error && (
+              <div className="mt-5 rounded-2xl border border-red-400/30 bg-red-500/15 px-4 py-3 text-sm font-bold text-red-200">
+                {error}
+              </div>
+            )}
 
+            <label className="mt-6 block">
+              <span className="mb-2 block text-sm font-bold text-white/70">اسم الفئة</span>
               <input
                 value={name}
                 onChange={(event) => setName(event.target.value)}
-                placeholder="مثال: كرة القدم"
+                placeholder="مثال: كأس العالم 2026"
                 className="h-14 w-full rounded-2xl border border-white/15 bg-black/15 px-4 font-bold outline-none focus:border-[#FACC15]"
               />
             </label>
 
             <div className="mt-5">
               <span className="mb-2 block text-sm font-bold text-white/70">
-                صورة الفئة
+                القسم الذي تظهر تحته الفئة
               </span>
 
-              <label className="flex min-h-56 cursor-pointer flex-col items-center justify-center overflow-hidden rounded-3xl border-2 border-dashed border-white/20 bg-black/15 transition hover:border-[#FACC15]">
-                {imagePreview ? (
-                  <img
-                    src={imagePreview}
-                    alt="معاينة صورة الفئة"
-                    className="h-56 w-full object-cover"
+              {!useCustomSection ? (
+                <>
+                  <select
+                    value={sectionName}
+                    onChange={(event) => setSectionName(event.target.value)}
+                    className="h-14 w-full rounded-2xl border border-white/15 bg-[#241044] px-4 font-bold outline-none focus:border-[#FACC15]"
+                  >
+                    <option value="">اختر القسم</option>
+                    {sectionOptions.map((section) => (
+                      <option key={section} value={section}>{section}</option>
+                    ))}
+                  </select>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setUseCustomSection(true);
+                      setSectionName('');
+                    }}
+                    className="mt-3 inline-flex items-center gap-2 rounded-xl border border-[#FACC15]/30 bg-[#FACC15]/10 px-4 py-3 text-sm font-black text-[#FACC15]"
+                  >
+                    <FolderPlus className="h-4 w-4" />
+                    إضافة قسم جديد من عندي
+                  </button>
+                </>
+              ) : (
+                <>
+                  <input
+                    value={customSection}
+                    onChange={(event) => setCustomSection(event.target.value)}
+                    placeholder="اكتب اسم القسم الجديد"
+                    className="h-14 w-full rounded-2xl border border-[#FACC15] bg-black/15 px-4 font-bold outline-none"
                   />
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setUseCustomSection(false);
+                      setCustomSection('');
+                    }}
+                    className="mt-3 rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-sm font-black"
+                  >
+                    الرجوع إلى الأقسام الجاهزة
+                  </button>
+                </>
+              )}
+            </div>
+
+            <div className="mt-5">
+              <span className="mb-2 block text-sm font-bold text-white/70">صورة الفئة</span>
+              <label className="flex min-h-60 cursor-pointer flex-col items-center justify-center overflow-hidden rounded-3xl border-2 border-dashed border-white/20 bg-black/15 transition hover:border-[#FACC15]">
+                {imagePreview ? (
+                  <div className="relative w-full">
+                    <img src={imagePreview} alt="معاينة صورة الفئة" className="h-72 w-full object-contain" />
+                    <button
+                      type="button"
+                      onClick={(event) => {
+                        event.preventDefault();
+                        setImageFile(null);
+                        setImagePreview('');
+                      }}
+                      className="absolute left-3 top-3 rounded-full bg-red-500 p-2"
+                    >
+                      <X className="h-5 w-5" />
+                    </button>
+                  </div>
                 ) : (
                   <>
                     <ImagePlus className="h-12 w-12 text-[#FACC15]" />
-                    <p className="mt-4 font-black">اضغط لرفع صورة</p>
-                    <p className="mt-2 text-sm text-white/40">
-                      JPG أو PNG بحد أقصى 5MB
-                    </p>
+                    <p className="mt-4 font-black">اضغط لرفع صورة الفئة</p>
+                    <p className="mt-2 text-sm text-white/40">JPG أو PNG بحد أقصى 5MB</p>
                   </>
                 )}
 
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  className="hidden"
-                />
+                <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
               </label>
             </div>
 
             <button
               type="submit"
               disabled={saving}
-              className="mt-6 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[#FACC15] font-black text-[#321064] disabled:opacity-60"
+              className="mt-6 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[#FACC15] font-black text-[#321064] disabled:opacity-50"
             >
               {saving ? (
                 <>
@@ -345,7 +512,7 @@ export default function CategoriesManager() {
               )}
             </button>
           </motion.form>
-        </motion.div>
+        </div>
       )}
 
       {loading ? (
@@ -353,70 +520,84 @@ export default function CategoriesManager() {
           <Loader2 className="h-10 w-10 animate-spin text-[#FACC15]" />
         </div>
       ) : categories.length === 0 ? (
-        <div className="flex min-h-[420px] flex-col items-center justify-center rounded-[30px] border border-white/10 bg-white/10 text-center">
-          <ImagePlus className="h-14 w-14 text-[#FACC15]" />
-          <h3 className="mt-5 text-2xl font-black">
-            لا توجد فئات بعد
-          </h3>
-          <p className="mt-3 text-white/50">
-            اضغط إضافة فئة جديدة وابدأ برفع أول صورة.
-          </p>
+        <div className="flex min-h-[420px] flex-col items-center justify-center rounded-[30px] border border-white/10 bg-white/10 p-6 text-center">
+          <FolderPlus className="h-14 w-14 text-[#FACC15]" />
+          <h3 className="mt-5 text-2xl font-black">لا توجد فئات بعد</h3>
+          <p className="mt-3 text-white/50">اضغط إضافة فئة جديدة واختر القسم المناسب.</p>
+        </div>
+      ) : groupedCategories.length === 0 ? (
+        <div className="rounded-[30px] border border-white/10 bg-white/10 p-12 text-center">
+          لا توجد فئات داخل هذا القسم.
         </div>
       ) : (
-        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-          {categories.map((category) => (
-            <motion.article
-              key={category.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="overflow-hidden rounded-[28px] border border-white/10 bg-white/10"
-            >
-              <img
-                src={category.image_url || ''}
-                alt={category.name}
-                className="h-52 w-full object-cover"
-              />
-
-              <div className="p-5">
-                <div className="flex items-center justify-between gap-3">
-                  <h3 className="text-xl font-black">
-                    {category.name}
-                  </h3>
-
-                  <button
-                    type="button"
-                    onClick={() => toggleActive(category)}
-                    className={`rounded-full px-3 py-1 text-xs font-black ${
-                      category.is_active
-                        ? 'bg-green-500/20 text-green-300'
-                        : 'bg-red-500/20 text-red-300'
-                    }`}
-                  >
-                    {category.is_active ? 'مفعلة' : 'مخفية'}
-                  </button>
+        <div className="space-y-8">
+          {groupedCategories.map(([section, sectionCategories]) => (
+            <section key={section} className="rounded-[30px] border border-white/10 bg-white/10 p-5">
+              <div className="mb-5 flex items-center justify-between">
+                <div>
+                  <h3 className="text-2xl font-black">{section}</h3>
+                  <p className="mt-1 text-sm text-white/45">{sectionCategories.length} فئة</p>
                 </div>
-
-                <div className="mt-5 flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => handleEdit(category)}
-                    className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-blue-500/15 px-4 py-3 font-bold text-blue-300"
-                  >
-                    <Edit className="h-4 w-4" />
-                    تعديل
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(category)}
-                    className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-red-500/15 px-4 py-3 font-bold text-red-300"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    حذف
-                  </button>
-                </div>
+                <span className="rounded-full bg-[#FACC15] px-4 py-1 font-black text-[#321064]">
+                  {sectionCategories.length}
+                </span>
               </div>
-            </motion.article>
+
+              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {sectionCategories.map((category) => (
+                  <article key={category.id} className="overflow-hidden rounded-[24px] border border-white/10 bg-black/15">
+                    {category.image_url ? (
+                      <img src={category.image_url} alt={category.name} className="h-52 w-full bg-black/10 object-contain" />
+                    ) : (
+                      <div className="flex h-52 items-center justify-center bg-white/5">
+                        <ImagePlus className="h-12 w-12 text-white/30" />
+                      </div>
+                    )}
+
+                    <div className="p-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <h4 className="text-lg font-black">{category.name}</h4>
+                          <p className="mt-1 text-xs text-white/45">{category.section_name}</p>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => toggleActive(category)}
+                          className={`rounded-full px-3 py-1 text-xs font-black ${
+                            category.is_active
+                              ? 'bg-green-500/20 text-green-300'
+                              : 'bg-red-500/20 text-red-300'
+                          }`}
+                        >
+                          {category.is_active ? 'مفعلة' : 'مخفية'}
+                        </button>
+                      </div>
+
+                      <div className="mt-4 flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleEdit(category)}
+                          className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-blue-500/15 px-3 py-3 font-bold text-blue-300"
+                        >
+                          <Edit className="h-4 w-4" />
+                          تعديل
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(category)}
+                          className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-red-500/15 px-3 py-3 font-bold text-red-300"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          حذف
+                        </button>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </section>
           ))}
         </div>
       )}
