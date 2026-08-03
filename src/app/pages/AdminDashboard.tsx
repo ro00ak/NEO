@@ -21,6 +21,7 @@ import {
 
 import { useAuth } from '../contexts/AuthContext';
 import CategoriesManager from './admin/CategoriesManager';
+import QuestionsManager from './admin/QuestionsManager';
 
 type AdminPage =
   | 'dashboard'
@@ -285,14 +286,7 @@ function AdminContent({
       return <CategoriesManager />;
 
     case 'questions':
-      return (
-        <EmptySection
-          icon={CircleHelp}
-          title="إدارة الأسئلة"
-          description="من هنا ستضيف السؤال والإجابة والفئة والنقاط والصورة أو الصوت أو الفيديو."
-          buttonLabel="إضافة سؤال جديد"
-        />
-      );
+      return <QuestionsManager />;
 
     case 'games':
       return (
