@@ -169,33 +169,37 @@ export function AuthProvider({
     const cleanName = name.trim();
     const cleanEmail = email.trim().toLowerCase();
 
-    const { data, error } = await supabase.auth.signUp({
+    const response = await supabase.auth.signUp({
       email: cleanEmail,
       password,
       options: {
         data: {
           full_name: cleanName,
         },
+        emailRedirectTo: window.location.origin,
       },
     });
 
-    if (error) {
-      console.error('Registration error:', error);
-      throw new Error(error.message);
+    console.log('Supabase signup response:', response);
+
+    if (response.error) {
+      throw new Error(response.error.message);
     }
-    
-    if (!data.user) {
-      throw new Error('لم يتم إنشاء المستخدم في Supabase.');
+
+    if (!response.data.user) {
+      throw new Error(
+        `لم يُرجع Supabase مستخدمًا: ${JSON.stringify(response.data)}`,
+      );
     }
 
     const newUser: AppUser = {
-      id: data.user.id,
-      email: cleanEmail,
+      id: response.data.user.id,
+      email: response.data.user.email || cleanEmail,
       name: cleanName,
       role: 'user',
     };
 
-    if (data.session) {
+    if (response.data.session) {
       setUser(newUser);
     }
 
