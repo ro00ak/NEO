@@ -185,7 +185,7 @@ export default function Hero({
 
             <div className="relative overflow-hidden rounded-[48px] border border-white/20 bg-gradient-to-br from-[#7C3AED] via-[#5B21B6] to-[#2E1065] p-5 shadow-[0_30px_100px_rgba(0,0,0,0.45)]">
               <img
-                src="/almaydan-logo"
+                src="/almaydan-logo.png"
                 alt="الميدان يا حميدان"
                 className="aspect-square w-full rounded-[36px] object-contain"
               />
