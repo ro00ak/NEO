@@ -8,6 +8,7 @@ import { ProductsProvider } from './contexts/ProductsContext';
 
 import Header from './components/Header';
 import Hero from './components/Hero';
+import HelpersShowcase from './components/HelpersShowcase';
 import Footer from './components/Footer';
 
 import Login from './pages/Login';
@@ -50,7 +51,12 @@ export default function App() {
   const renderPage = () => {
     switch (currentPage) {
       case 'home':
-        return <Hero onNavigate={handleNavigate} />;
+        return (
+          <>
+            <Hero onNavigate={handleNavigate} />
+            <HelpersShowcase />
+          </>
+        );
 
       case 'play':
         return <GameSetup onNavigate={handleNavigate} />;
@@ -248,7 +254,12 @@ export default function App() {
         return <AdminDashboard />;
 
       default:
-        return <Hero onNavigate={handleNavigate} />;
+        return (
+          <>
+            <Hero onNavigate={handleNavigate} />
+            <HelpersShowcase />
+          </>
+        );
     }
   };
 
