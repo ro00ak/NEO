@@ -13,6 +13,7 @@ export type CurrencyCode =
   | 'QAR'
   | 'KWD'
   | 'BHD'
+  | 'JOD'
   | 'USD';
 
 interface Currency {
@@ -71,6 +72,14 @@ export const currencies: Currency[] = [
     name: 'الدينار البحريني',
     symbol: 'د.ب',
     rate: 0.98,
+    decimals: 3,
+  },
+  {
+    code: 'JOD',
+    flag: '🇯🇴',
+    name: 'الدينار الأردني',
+    symbol: 'د.أ',
+    rate: 1.845,
     decimals: 3,
   },
   {
