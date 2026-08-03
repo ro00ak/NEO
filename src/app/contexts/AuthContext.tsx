@@ -179,9 +179,13 @@ export function AuthProvider({
       },
     });
 
-    if (error || !data.user) {
+    if (error) {
       console.error('Registration error:', error);
-      return null;
+      throw new Error(error.message);
+    }
+    
+    if (!data.user) {
+      throw new Error('لم يتم إنشاء المستخدم في Supabase.');
     }
 
     const newUser: AppUser = {
