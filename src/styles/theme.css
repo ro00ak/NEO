@@ -152,11 +152,6 @@
     @apply bg-black/30 dark:bg-white/30;
   }
 
-  /**
-  * Default typography styles for HTML elements (h1-h4, p, label, button, input).
-  * These are in @layer base, so Tailwind utility classes (like text-sm, text-lg) automatically override them.
-  */
-
   html {
     font-size: var(--font-size);
   }
@@ -202,4 +197,45 @@
     font-weight: var(--font-weight-normal);
     line-height: 1.5;
   }
+}
+
+/* تحسين أداء Safari فقط */
+.is-safari {
+  --app-height: 100vh;
+}
+
+.is-safari body {
+  min-height: var(--app-height);
+}
+
+/* إيقاف الحركات والانتقالات الثقيلة */
+.is-safari *,
+.is-safari *::before,
+.is-safari *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* إلغاء تأثيرات الزجاج والبلور الثقيلة */
+.is-safari [class*='backdrop-blur'] {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+/* تقليل تأثيرات blur الكبيرة */
+.is-safari [class*='blur-'] {
+  filter: none !important;
+}
+
+/* تقليل الظلال الثقيلة */
+.is-safari [class*='shadow-'] {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* تحسين تمرير الصفحات على iPhone */
+.is-safari body {
+  -webkit-overflow-scrolling: touch;
+  overflow-x: hidden;
 }
