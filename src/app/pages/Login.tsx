@@ -142,17 +142,15 @@ export default function Login({ onSuccess }: LoginProps) {
         className="relative z-10 w-full max-w-md rounded-[36px] border border-white/15 bg-white/10 p-6 shadow-[0_30px_100px_rgba(0,0,0,0.35)] backdrop-blur-xl sm:p-9"
       >
         <div className="text-center">
-          <img
-            src="/almaydan-logo.png"
-            alt="الميدان يا حميدان"
-            className="mx-auto h-24 w-24 rounded-[26px] object-cover shadow-xl"
-          />
+          <div className="flex justify-center bg-transparent p-0 shadow-none">
+            <img
+              src="/almaydan-logo.png?v=8"
+              alt="الميدان يا حميدان"
+              className="h-28 w-auto object-contain"
+            />
+          </div>
 
-          <p className="mt-6 text-sm font-bold text-yellow-400">
-            الميدان يا حميدان
-          </p>
-
-          <h1 className="mt-2 text-3xl font-black">
+          <h1 className="mt-6 text-3xl font-black">
             {isLogin ? 'تسجيل الدخول' : 'إنشاء حساب جديد'}
           </h1>
 
