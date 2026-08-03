@@ -98,13 +98,7 @@ export default function Hero({
 
             <motion.button
               type="button"
-              onClick={() =>
-                document
-                  .getElementById('how-it-works')
-                  ?.scrollIntoView({
-                    behavior: 'smooth',
-                  })
-              }
+              onClick={() => onNavigate('how')}
               whileHover={{
                 y: -3,
                 scale: 1.02,
