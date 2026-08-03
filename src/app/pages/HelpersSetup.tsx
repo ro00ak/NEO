@@ -2,14 +2,17 @@ import { useState } from 'react';
 import { motion } from 'motion/react';
 import {
   ArrowLeft,
+  Bomb,
   Check,
   CircleHelp,
+  Hand,
+  Loader2,
   Phone,
-  RefreshCw,
-  ShieldCheck,
   Sparkles,
   Swords,
 } from 'lucide-react';
+
+import { useAuth } from '../contexts/AuthContext';
 
 interface HelpersSetupProps {
   onNavigate: (page: string) => void;
@@ -17,42 +20,48 @@ interface HelpersSetupProps {
 
 const helpers = [
   {
-    id: 'two-answers',
-    name: 'إجابتان',
-    description: 'تساعدك في تضييق خيارات الإجابة.',
-    icon: CircleHelp,
-  },
-  {
     id: 'phone',
     name: 'اتصال بصديق',
-    description: 'يتم إيقاف المؤقت مؤقتًا للاتصال بصديق.',
+    description: 'دقيقة تقريبًا للاتصال بعد ظهور السؤال.',
     icon: Phone,
   },
   {
-    id: 'replace',
-    name: 'تبديل السؤال',
-    description: 'استبدل السؤال بسؤال آخر من نفس الفئة.',
-    icon: RefreshCw,
-  },
-  {
-    id: 'second-chance',
-    name: 'فرصة ثانية',
-    description: 'محاولة إضافية بعد الإجابة الخاطئة.',
-    icon: ShieldCheck,
-  },
-  {
-    id: 'steal',
-    name: 'سرقة السؤال',
-    description: 'انتزع فرصة الإجابة من الفريق المنافس.',
+    id: 'hole',
+    name: 'الحفرة',
+    description: 'إذا أجبت صح تُخصم قيمة السؤال من الخصم.',
     icon: Swords,
+  },
+  {
+    id: 'two-answers',
+    name: 'جاوب جوابين',
+    description: 'تقدر تقدم إجابتين مختلفتين.',
+    icon: CircleHelp,
+  },
+  {
+    id: 'rest',
+    name: 'استريح',
+    description: 'الفريق المنافس لا يشارك في هذا السؤال.',
+    icon: Hand,
+  },
+  {
+    id: 'trap',
+    name: 'الفخ',
+    description: 'إذا أخطأ الخصم تُخصم منه قيمة السؤال.',
+    icon: Bomb,
   },
 ];
 
 export default function HelpersSetup({
   onNavigate,
 }: HelpersSetupProps) {
-  const [teamOneHelpers, setTeamOneHelpers] = useState<string[]>([]);
-  const [teamTwoHelpers, setTeamTwoHelpers] = useState<string[]>([]);
+  const { consumeGame } = useAuth();
+
+  const [teamOneHelpers, setTeamOneHelpers] =
+    useState<string[]>([]);
+  const [teamTwoHelpers, setTeamTwoHelpers] =
+    useState<string[]>([]);
+  const [starting, setStarting] = useState(false);
+  const [startError, setStartError] = useState('');
 
   const toggleHelper = (
     helperId: string,
@@ -60,19 +69,62 @@ export default function HelpersSetup({
     setSelected: (value: string[]) => void,
   ) => {
     if (selected.includes(helperId)) {
-      setSelected(selected.filter((id) => id !== helperId));
+      setSelected(
+        selected.filter((id) => id !== helperId),
+      );
       return;
     }
 
-    if (selected.length >= 3) {
-      return;
-    }
+    if (selected.length >= 3) return;
 
     setSelected([...selected, helperId]);
   };
 
   const canContinue =
-    teamOneHelpers.length === 3 && teamTwoHelpers.length === 3;
+    teamOneHelpers.length === 3 &&
+    teamTwoHelpers.length === 3;
+
+  const startGame = async () => {
+    if (!canContinue || starting) return;
+
+    setStarting(true);
+    setStartError('');
+
+    const result = await consumeGame();
+
+    if (!result.success) {
+      setStarting(false);
+
+      if (result.code === 'login_required') {
+        onNavigate('login');
+        return;
+      }
+
+      if (result.code === 'no_games') {
+        setStartError(
+          'انتهى رصيد الألعاب. اشترِ باقة جديدة للمتابعة.',
+        );
+        return;
+      }
+
+      setStartError(
+        result.message ||
+          'تعذر بدء اللعبة، حاول مرة أخرى.',
+      );
+      return;
+    }
+
+    sessionStorage.setItem(
+      'teamOneHelpers',
+      JSON.stringify(teamOneHelpers),
+    );
+    sessionStorage.setItem(
+      'teamTwoHelpers',
+      JSON.stringify(teamTwoHelpers),
+    );
+
+    onNavigate('board');
+  };
 
   return (
     <main
@@ -121,6 +173,22 @@ export default function HelpersSetup({
           />
         </div>
 
+        {startError && (
+          <div className="mx-auto mt-8 max-w-xl rounded-2xl border border-red-400/30 bg-red-500/15 px-5 py-4 text-center font-bold text-red-100">
+            {startError}
+
+            {startError.includes('انتهى') && (
+              <button
+                type="button"
+                onClick={() => onNavigate('pricing')}
+                className="mr-3 underline"
+              >
+                عرض الباقات
+              </button>
+            )}
+          </div>
+        )}
+
         <div className="mt-12 flex flex-col justify-center gap-4 sm:flex-row">
           <button
             type="button"
@@ -132,12 +200,21 @@ export default function HelpersSetup({
 
           <button
             type="button"
-            disabled={!canContinue}
-            onClick={() => onNavigate('board')}
+            disabled={!canContinue || starting}
+            onClick={startGame}
             className="inline-flex min-w-64 items-center justify-center gap-3 rounded-2xl bg-yellow-400 px-8 py-4 text-lg font-black text-[#321064] transition enabled:hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-40"
           >
-            ابدأ الميدان
-            <ArrowLeft className="h-5 w-5" />
+            {starting ? (
+              <>
+                <Loader2 className="h-5 w-5 animate-spin" />
+                جاري بدء اللعبة
+              </>
+            ) : (
+              <>
+                ابدأ الميدان
+                <ArrowLeft className="h-5 w-5" />
+              </>
+            )}
           </button>
         </div>
       </div>
@@ -157,7 +234,7 @@ function TeamHelpers({
   onToggle,
 }: TeamHelpersProps) {
   return (
-    <section className="rounded-[32px] border border-white/15 bg-white/10 p-6 backdrop-blur-xl">
+    <section className="rounded-[32px] border border-white/15 bg-white/10 p-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-black">{title}</h2>
 
@@ -169,7 +246,8 @@ function TeamHelpers({
       <div className="mt-6 grid gap-4">
         {helpers.map((helper) => {
           const Icon = helper.icon;
-          const isSelected = selected.includes(helper.id);
+          const isSelected =
+            selected.includes(helper.id);
 
           return (
             <motion.button
