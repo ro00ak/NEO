@@ -330,136 +330,133 @@ export default function Header({
           هيدر الجوال فقط
       ========================== */}
       <header className="fixed inset-x-0 top-0 z-50 px-3 pt-3 text-white lg:hidden">
-        <div className="mx-auto flex min-h-[62px] items-center justify-between gap-2 rounded-[21px] border border-[#7868D9]/40 bg-[linear-gradient(135deg,rgba(16,7,37,0.97),rgba(28,11,61,0.96))] px-3 py-2.5 shadow-[0_6px_0_rgba(43,31,105,0.72),0_16px_38px_rgba(4,0,18,0.34)]">
-          {/* تسجيل الدخول / الحساب على اليمين */}
+        <div className="mx-auto flex min-h-[62px] items-center rounded-[21px] border border-[#7868D9]/40 bg-[linear-gradient(135deg,rgba(16,7,37,0.97),rgba(28,11,61,0.96))] px-3 py-2.5 shadow-[0_6px_0_rgba(43,31,105,0.72),0_16px_38px_rgba(4,0,18,0.34)]">
+
+          {/* يسار: الثلاث خطوط + العملة */}
+          <div className="flex items-center gap-2">
+
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen((current) => !current)}
+              className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#7569CB]/50 bg-gradient-to-b from-[#302A68] to-[#211A4D] text-[#FACC15] shadow-[0_3px_0_#151132]"
+              aria-label={
+                mobileMenuOpen
+                  ? 'إغلاق القائمة'
+                  : 'فتح القائمة'
+              }
+            >
+              {mobileMenuOpen ? (
+                <X className="h-5 w-5" />
+              ) : (
+                <Menu className="h-5 w-5" />
+              )}
+            </button>
+
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setCurrencyMenuOpen((current) => !current)}
+                className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#7569CB]/50 bg-gradient-to-b from-[#302A68] to-[#211A4D] shadow-[0_3px_0_#151132]"
+                aria-label={`العملة الحالية: ${currency.name}`}
+              >
+                <img
+                  src={currency.flagUrl}
+                  alt={currency.name}
+                  className="h-6 w-6 rounded-full border border-white/60 bg-white object-contain p-[1px]"
+                />
+              </button>
+
+              <AnimatePresence>
+                {currencyMenuOpen && (
+                  <motion.div
+                    initial={{
+                      opacity: 0,
+                      y: -8,
+                      scale: 0.97,
+                    }}
+                    animate={{
+                      opacity: 1,
+                      y: 0,
+                      scale: 1,
+                    }}
+                    exit={{
+                      opacity: 0,
+                      y: -6,
+                      scale: 0.98,
+                    }}
+                    transition={{ duration: 0.16 }}
+                    dir="rtl"
+                    className="absolute left-1/2 top-[calc(100%+12px)] z-[120] w-[292px] -translate-x-1/2 rounded-[22px] border border-[#8D7DF0]/45 bg-[#F5F3FC] p-3 text-[#25183F] shadow-[0_24px_55px_rgba(5,0,20,0.42)]"
+                  >
+                    <p className="mb-3 text-sm font-black text-[#28104B]">
+                      اختر العملة
+                    </p>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      {currencies.map((item) => {
+                        const isSelected =
+                          currency.code === item.code;
+
+                        return (
+                          <button
+                            key={item.code}
+                            type="button"
+                            onClick={() =>
+                              chooseCurrency(
+                                item.code as CurrencyCode,
+                              )
+                            }
+                            className={`flex min-h-[56px] items-center gap-2 rounded-2xl border px-2.5 py-2 text-right ${
+                              isSelected
+                                ? 'border-[#5B3FC4] bg-[#E8E1FF]'
+                                : 'border-[#D2CDE3] bg-white'
+                            }`}
+                          >
+                            <img
+                              src={item.flagUrl}
+                              alt={item.name}
+                              width={28}
+                              height={28}
+                              className="h-7 w-7 shrink-0 rounded-full border border-[#D7D4E2] bg-white object-contain p-[1px]"
+                            />
+
+                            <span className="min-w-0">
+                              <span className="block text-xs font-black">
+                                {item.code}
+                              </span>
+
+                              <span className="block truncate text-[9px] font-bold text-[#28104B]/55">
+                                {item.name}
+                              </span>
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+          </div>
+
+          {/* يمين: تسجيل الدخول */}
           <button
             type="button"
             onClick={openAccount}
-            className="inline-flex h-10 max-w-[150px] items-center justify-center gap-2 rounded-xl border border-[#FACC15]/35 bg-gradient-to-b from-[#F9D441] to-[#E8AC00] px-3.5 font-black text-[#28104B] shadow-[0_3px_0_#8A6200]"
+            className="ml-auto inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[#FACC15]/35 bg-gradient-to-b from-[#F9D441] to-[#E8AC00] px-4 font-black text-[#28104B] shadow-[0_3px_0_#8A6200]"
           >
             {user ? (
-              <UserRound className="h-4 w-4 shrink-0" />
+              <UserRound className="h-4 w-4" />
             ) : (
-              <LogIn className="h-4 w-4 shrink-0" />
+              <LogIn className="h-4 w-4" />
             )}
 
-            <span className="truncate text-xs">
+            <span className="text-xs">
               {accountLabel}
             </span>
           </button>
 
-          {/* العملة في المنتصف: العلم فقط */}
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() =>
-                setCurrencyMenuOpen(
-                  (current) => !current,
-                )
-              }
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#7569CB]/50 bg-gradient-to-b from-[#302A68] to-[#211A4D] shadow-[0_3px_0_#151132]"
-              aria-label={`العملة الحالية: ${currency.name}`}
-            >
-              <img
-                src={currency.flagUrl}
-                alt={currency.name}
-                width={26}
-                height={26}
-                className="h-[26px] w-[26px] rounded-full border border-white/60 bg-white object-contain p-[1px]"
-              />
-            </button>
-
-            <AnimatePresence>
-              {currencyMenuOpen && (
-                <motion.div
-                  initial={{
-                    opacity: 0,
-                    y: -8,
-                    scale: 0.97,
-                  }}
-                  animate={{
-                    opacity: 1,
-                    y: 0,
-                    scale: 1,
-                  }}
-                  exit={{
-                    opacity: 0,
-                    y: -6,
-                    scale: 0.98,
-                  }}
-                  transition={{ duration: 0.16 }}
-                  dir="rtl"
-                  className="absolute left-1/2 top-[calc(100%+12px)] z-[120] w-[292px] -translate-x-1/2 rounded-[22px] border border-[#8D7DF0]/45 bg-[#F5F3FC] p-3 text-[#25183F] shadow-[0_24px_55px_rgba(5,0,20,0.42)]"
-                >
-                  <p className="mb-3 text-sm font-black text-[#28104B]">
-                    اختر العملة
-                  </p>
-
-                  <div className="grid grid-cols-2 gap-2">
-                    {currencies.map((item) => {
-                      const isSelected =
-                        currency.code === item.code;
-
-                      return (
-                        <button
-                          key={item.code}
-                          type="button"
-                          onClick={() =>
-                            chooseCurrency(
-                              item.code as CurrencyCode,
-                            )
-                          }
-                          className={`flex min-h-[56px] items-center gap-2 rounded-2xl border px-2.5 py-2 text-right ${
-                            isSelected
-                              ? 'border-[#5B3FC4] bg-[#E8E1FF]'
-                              : 'border-[#D2CDE3] bg-white'
-                          }`}
-                        >
-                          <img
-                            src={item.flagUrl}
-                            alt={item.name}
-                            width={28}
-                            height={28}
-                            className="h-7 w-7 shrink-0 rounded-full border border-[#D7D4E2] bg-white object-contain p-[1px]"
-                          />
-
-                          <span className="min-w-0">
-                            <span className="block text-xs font-black">
-                              {item.code}
-                            </span>
-
-                            <span className="block truncate text-[9px] font-bold text-[#28104B]/55">
-                              {item.name}
-                            </span>
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-
-          {/* الثلاث خطوط على اليسار */}
-          <button
-            type="button"
-            onClick={() =>
-              setMobileMenuOpen((current) => !current)
-            }
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#7569CB]/50 bg-gradient-to-b from-[#302A68] to-[#211A4D] text-[#FACC15] shadow-[0_3px_0_#151132]"
-            aria-label={
-              mobileMenuOpen
-                ? 'إغلاق القائمة'
-                : 'فتح القائمة'
-            }
-          >
-            {mobileMenuOpen ? (
-              <X className="h-5 w-5" />
-            ) : (
-              <Menu className="h-5 w-5" />
-            )}
-          </button>
         </div>
       </header>
 
