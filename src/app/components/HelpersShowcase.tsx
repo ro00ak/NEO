@@ -92,7 +92,42 @@ export default function HelpersShowcase() {
                   0{index + 1}
                 </span>
 
-                <div className="mx-auto mt-4 flex h-16 w-16 items-center justify-center rounded-full border-2 border-[#FACC15]/55 bg-[#FACC15]/10 text-[#FACC15] sm:mt-6 sm:h-22 sm:w-22 sm:border-4">
+                <div
+                  className="mx-auto mt-4 flex h-16 w-16 items-center justify-center rounded-full border-2 sm:mt-6 sm:h-22 sm:w-22 sm:border-4"
+                  style={{
+                    borderColor:
+                      index === 0
+                        ? '#60A5FA'
+                        : index === 1
+                        ? '#16A34A'
+                        : index === 2
+                        ? '#FACC15'
+                        : index === 3
+                        ? '#EF4444'
+                        : '#C68B59',
+
+                    backgroundColor:
+                      index === 0
+                        ? '#60A5FA20'
+                        : index === 1
+                        ? '#16A34A20'
+                        : index === 2
+                        ? '#FACC1520'
+                        : index === 3
+                        ? '#EF444420'
+                        : '#C68B5920',
+
+                    color:
+                      index === 0
+                        ? '#60A5FA'
+                        : index === 1
+                        ? '#16A34A'
+                        : index === 2
+                        ? '#FACC15'
+                        : index === 3
+                        ? '#EF4444'
+                        : '#C68B59',
+                  }}>
                   <Icon className="h-8 w-8 sm:h-10 sm:w-10" />
                 </div>
 
