@@ -5,6 +5,7 @@ import { LanguageProvider } from './contexts/LanguageContext';
 import { CartProvider } from './contexts/CartContext';
 import { AuthProvider } from './contexts/AuthContext';
 import { ProductsProvider } from './contexts/ProductsContext';
+import { CurrencyProvider } from './contexts/CurrencyContext';
 
 import Header from './components/Header';
 import Hero from './components/Hero';
@@ -297,27 +298,29 @@ export default function App() {
 
   return (
     <AuthProvider>
-      <ProductsProvider>
-        <CartProvider>
-          <LanguageProvider>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="light"
-              enableSystem={false}
-            >
-              <div className="min-h-screen bg-[#2E1065]">
-                {showHeader && (
-                  <Header onNavigate={handleNavigate} />
-                )}
+      <CurrencyProvider>
+        <ProductsProvider>
+          <CartProvider>
+            <LanguageProvider>
+              <ThemeProvider
+                attribute="class"
+                defaultTheme="light"
+                enableSystem={false}
+              >
+                <div className="min-h-screen bg-[#2E1065]">
+                  {showHeader && (
+                    <Header onNavigate={handleNavigate} />
+                  )}
 
-                {renderPage()}
+                  {renderPage()}
 
-                {showFooter && <Footer />}
-              </div>
-            </ThemeProvider>
-          </LanguageProvider>
-        </CartProvider>
-      </ProductsProvider>
+                  {showFooter && <Footer />}
+                </div>
+              </ThemeProvider>
+            </LanguageProvider>
+          </CartProvider>
+        </ProductsProvider>
+      </CurrencyProvider>
     </AuthProvider>
   );
 }
