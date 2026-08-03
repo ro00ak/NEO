@@ -17,6 +17,7 @@ export type CurrencyCode =
 
 interface Currency {
   code: CurrencyCode;
+  flag: string;
   name: string;
   symbol: string;
   rate: number;
@@ -26,6 +27,7 @@ interface Currency {
 export const currencies: Currency[] = [
   {
     code: 'OMR',
+    flag: '🇴🇲',
     name: 'الريال العماني',
     symbol: 'ر.ع',
     rate: 1,
@@ -33,6 +35,7 @@ export const currencies: Currency[] = [
   },
   {
     code: 'SAR',
+    flag: '🇸🇦',
     name: 'الريال السعودي',
     symbol: 'ر.س',
     rate: 9.75,
@@ -40,6 +43,7 @@ export const currencies: Currency[] = [
   },
   {
     code: 'AED',
+    flag: '🇦🇪',
     name: 'الدرهم الإماراتي',
     symbol: 'د.إ',
     rate: 9.56,
@@ -47,6 +51,7 @@ export const currencies: Currency[] = [
   },
   {
     code: 'QAR',
+    flag: '🇶🇦',
     name: 'الريال القطري',
     symbol: 'ر.ق',
     rate: 9.48,
@@ -54,6 +59,7 @@ export const currencies: Currency[] = [
   },
   {
     code: 'KWD',
+    flag: '🇰🇼',
     name: 'الدينار الكويتي',
     symbol: 'د.ك',
     rate: 0.80,
@@ -61,6 +67,7 @@ export const currencies: Currency[] = [
   },
   {
     code: 'BHD',
+    flag: '🇧🇭',
     name: 'الدينار البحريني',
     symbol: 'د.ب',
     rate: 0.98,
@@ -68,6 +75,7 @@ export const currencies: Currency[] = [
   },
   {
     code: 'USD',
+    flag: '🇺🇸',
     name: 'الدولار الأمريكي',
     symbol: '$',
     rate: 2.60,
