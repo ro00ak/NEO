@@ -105,7 +105,7 @@ export default function Header({
               <img
                 src={currency.flagUrl}
                 alt={currency.name}
-                className="h-6 w-6 rounded-full object-cover"
+                className="h-6 w-6 rounded-full border border-gray-300 bg-white object-contain p-[1px]"
               />
 
               <span>{currency.code}</span>
@@ -151,7 +151,7 @@ export default function Header({
                         <img
                           src={item.flagUrl}
                           alt={item.name}
-                          className="h-6 w-6 rounded-full object-cover"
+                          className="h-6 w-6 rounded-full border border-gray-300 bg-white object-contain p-[1px]"
                         />
 
                         <span className="text-sm">
