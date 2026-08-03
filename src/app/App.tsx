@@ -13,6 +13,7 @@ import GameSetup from './pages/GameSetup';
 import TeamsSetup from './pages/TeamsSetup';
 import HelpersSetup from './pages/HelpersSetup';
 import GameBoard from './pages/GameBoard';
+import QuestionReady from './pages/QuestionReady';
 
 type Page =
   | 'home'
@@ -25,7 +26,8 @@ type Page =
   | 'helpers'
   | 'board'
   | 'question-ready'
-  | 'results';
+  | 'results'
+  | 'question';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
@@ -49,14 +51,16 @@ export default function App() {
       case 'board':
         return <GameBoard onNavigate={handleNavigate} />;
       case 'question-ready':
+        return <QuestionReady onNavigate={handleNavigate} />;
+      case 'question':
         return (
           <div dir="rtl" className="min-h-screen bg-[#2E1065] px-6 pt-32 text-white">
             <div className="mx-auto max-w-5xl text-center">
               <h1 className="text-5xl font-black text-[#FACC15]">
-                السؤال جاهز
+                السؤال الحالي
               </h1>
               <p className="mt-5 text-xl text-white/75">
-                جاري عرض تفاصيل السؤال والنقاط...
+                عرض نص السؤال والخيارات للفرق...
               </p>
             </div>
           </div>
