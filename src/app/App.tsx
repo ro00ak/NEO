@@ -6,22 +6,17 @@ import { AuthProvider } from './contexts/AuthContext';
 import { ProductsProvider } from './contexts/ProductsContext';
 import Header from './components/Header';
 import Hero from './components/Hero';
-import Products from './components/Products';
-import Features from './components/Features';
 import Footer from './components/Footer';
-import ProductDetail from './pages/ProductDetail';
-import Cart from './pages/Cart';
-import Shop from './pages/Shop';
-import About from './pages/About';
-import Contact from './pages/Contact';
-import Wholesale from './pages/Wholesale';
 import Login from './pages/Login';
 import AdminDashboard from './pages/AdminDashboard';
-import WholesaleDashboard from './pages/WholesaleDashboard';
-import CustomerDashboard from './pages/CustomerDashboard';
-import { useAuth } from './contexts/AuthContext';
 
-type Page = 'home' | 'product-detail' | 'cart' | 'about' | 'contact' | 'wholesale' | 'login' | 'admin' | 'wholesale-dashboard' | 'customer-dashboard' | 'shop';
+type Page =
+  | 'home'
+  | 'play'
+  | 'how'
+  | 'leaderboard'
+  | 'login'
+  | 'admin';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
@@ -32,55 +27,74 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleProductClick = (product: any) => {
-    setSelectedProduct(product);
-    setCurrentPage('product-detail');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
   const renderPage = () => {
     switch (currentPage) {
       case 'home':
+        return <Hero onNavigate={handleNavigate} />;
+      case 'play':
         return (
-          <>
-            <Hero onNavigate={handleNavigate} />
-            <Products
-              onProductClick={handleProductClick}
-              onViewAll={() => handleNavigate('shop')}
-              limit={5}
-            />
-            <Features />
-          </>
+          <div dir="rtl" className="min-h-screen bg-[#2E1065] px-6 pt-32 text-white">
+            <div className="mx-auto max-w-5xl text-center">
+              <h1 className="text-5xl font-black text-[#FACC15]">
+                أنشئ ميدانك
+              </h1>
+
+              <p className="mt-5 text-xl text-white/75">
+                اختر الفئات، جهز الفرق، وابدأ المنافسة.
+              </p>
+            </div>
+          </div>
         );
-      case 'shop':
-        return <Shop onProductClick={handleProductClick} />;
-      case 'product-detail':
-        return selectedProduct ? (
-          <ProductDetail
-            product={selectedProduct}
-            onBack={() => setCurrentPage('home')}
-          />
-        ) : null;
-      case 'cart':
-        return <Cart onNavigate={handleNavigate} />;
-      case 'about':
-        return <About />;
-      case 'contact':
-        return <Contact />;
-      case 'wholesale':
-        return <Wholesale />;
+      case 'how':
+        return (
+          <div dir="rtl" className="min-h-screen bg-[#2E1065] px-6 pt-32 text-white">
+            <div className="mx-auto max-w-5xl">
+              <h1 className="text-center text-5xl font-black text-[#FACC15]">
+                طريقة اللعب
+              </h1>
+
+              <div className="mt-12 grid gap-5 md:grid-cols-3">
+                {[
+                  'اختر 6 فئات',
+                  'أدخل أسماء الفرق',
+                  'اختاروا الأسئلة واجمعوا النقاط',
+                ].map((item, index) => (
+                  <div
+                    key={item}
+                    className="rounded-3xl border border-white/15 bg-white/10 p-8 text-center"
+                  >
+                    <span className="text-4xl font-black text-[#FACC15]">
+                      {index + 1}
+                    </span>
+
+                    <p className="mt-4 text-lg font-bold">{item}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+      case 'leaderboard':
+        return (
+          <div dir="rtl" className="min-h-screen bg-[#2E1065] px-6 pt-32 text-white">
+            <div className="mx-auto max-w-5xl text-center">
+              <h1 className="text-5xl font-black text-[#FACC15]">
+                التصنيفات
+              </h1>
+
+              <p className="mt-5 text-xl text-white/75">
+                سيتم إضافة أفضل الفرق واللاعبين هنا لاحقًا.
+              </p>
+            </div>
+          </div>
+        );
       case 'login':
         return <Login onSuccess={(role) => {
           if (role === 'admin') setCurrentPage('admin');
-          else if (role === 'wholesale') setCurrentPage('wholesale-dashboard');
-          else setCurrentPage('customer-dashboard');
+          else setCurrentPage('home');
         }} />;
       case 'admin':
         return <AdminDashboard />;
-      case 'wholesale-dashboard':
-        return <WholesaleDashboard onProductClick={handleProductClick} />;
-      case 'customer-dashboard':
-        return <CustomerDashboard onNavigate={handleNavigate} />;
       default:
         return null;
     }
