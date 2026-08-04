@@ -69,13 +69,13 @@ export default function Header({
     };
 
     document.addEventListener(
-      'mousedown',
+      'click',
       closeCurrencyMenu,
     );
 
     return () => {
       document.removeEventListener(
-        'mousedown',
+        'click',
         closeCurrencyMenu,
       );
     };
@@ -183,11 +183,10 @@ export default function Header({
     >
       <button
         type="button"
-        onClick={() =>
-          setCurrencyMenuOpen(
-            (current) => !current,
-          )
-        }
+        onClick={(e) => {
+          e.stopPropagation();
+          setCurrencyMenuOpen((current) => !current);
+        }}
         className={
           mobile
             ? 'flex h-10 w-10 items-center justify-center rounded-xl border border-[#7569CB]/50 bg-gradient-to-b from-[#302A68] to-[#211A4D] shadow-[0_3px_0_#151132]'
@@ -229,6 +228,7 @@ export default function Header({
               scale: 0.98,
             }}
             dir="rtl"
+            onClick={(e) => e.stopPropagation()}
             className={`absolute top-[calc(100%+12px)] z-[120] rounded-[24px] border border-[#8D7DF0]/45 bg-[#F5F3FC] p-3 text-[#25183F] shadow-[0_24px_55px_rgba(5,0,20,0.42)] ${
               mobile
                 ? 'left-1/2 w-[292px] -translate-x-1/2'
@@ -253,7 +253,7 @@ export default function Header({
                         item.code as CurrencyCode,
                       )
                     }
-                    className={`flex min-h-[56px] items-center gap-2 rounded-2xl border px-2.5 py-2 text-right ${
+                    className={`flex min-h-[56px] items-center gap-2 rounded-2xl border px-2.5 py-2 text-right transition hover:scale-[1.02] ${
                       selected
                         ? 'border-[#5B3FC4] bg-[#E8E1FF]'
                         : 'border-[#D2CDE3] bg-white'
