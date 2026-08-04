@@ -22,6 +22,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import CategoriesManager from './admin/CategoriesManager';
 import QuestionsManager from './admin/QuestionsManager';
+import UsersManager from './admin/UsersManager';
 
 type AdminPage =
   | 'dashboard'
@@ -274,13 +275,7 @@ function AdminContent({
       );
 
     case 'users':
-      return (
-        <EmptySection
-          icon={Users}
-          title="إدارة المستخدمين"
-          description="ستظهر هنا حسابات العملاء المسجلين في الموقع، وأدوارهم وحالة حساباتهم."
-        />
-      );
+      return <UsersManager />;
 
     case 'categories':
       return <CategoriesManager />;
