@@ -43,39 +43,47 @@ interface CreatePurchaseResult {
   error?: string;
 }
 
+interface BasicResult {
+  success: boolean;
+  error?: string;
+}
+
 interface AuthContextType {
   user: AppUser | null;
   entitlement: GameEntitlement;
   loading: boolean;
   entitlementLoading: boolean;
+
   login: (
     email: string,
     password: string,
   ) => Promise<AppUser | null>;
+
   register: (
     name: string,
     email: string,
     password: string,
   ) => Promise<AppUser | null>;
+
   logout: () => Promise<void>;
+
   sendPasswordReset: (
     email: string,
-  ) => Promise<{
-    success: boolean;
-    error?: string;
-  }>;
+  ) => Promise<BasicResult>;
+
   updatePassword: (
     password: string,
-  ) => Promise<{
-    success: boolean;
-    error?: string;
-  }>;
+  ) => Promise<BasicResult>;
+
   refreshEntitlement: () => Promise<void>;
+
   consumeGame: () => Promise<ConsumeGameResult>;
+
   createPackagePurchase: (
     packageId: string,
     amountOmr: number,
   ) => Promise<CreatePurchaseResult>;
+
   isAdmin: boolean;
 }
 
@@ -85,9 +93,9 @@ const emptyEntitlement: GameEntitlement = {
   unlimited: false,
 };
 
-const AuthContext = createContext<AuthContextType | undefined>(
-  undefined,
-);
+const AuthContext = createContext<
+  AuthContextType | undefined
+>(undefined);
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -96,26 +104,43 @@ interface AuthProviderProps {
 export function AuthProvider({
   children,
 }: AuthProviderProps) {
-  const [user, setUser] = useState<AppUser | null>(null);
+  const [user, setUser] =
+    useState<AppUser | null>(null);
+
   const [entitlement, setEntitlement] =
-    useState<GameEntitlement>(emptyEntitlement);
-  const [loading, setLoading] = useState(true);
-  const [entitlementLoading, setEntitlementLoading] =
-    useState(false);
+    useState<GameEntitlement>(
+      emptyEntitlement,
+    );
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [
+    entitlementLoading,
+    setEntitlementLoading,
+  ] = useState(false);
 
   const getProfile = async (
     userId: string,
     email: string,
     metadataName?: string,
   ): Promise<AppUser> => {
-    const { data: profile, error } = await supabase
+    const {
+      data: profile,
+      error,
+    } = await supabase
       .from('profiles')
-      .select('id, email, full_name, role')
+      .select(
+        'id, email, full_name, role',
+      )
       .eq('id', userId)
       .maybeSingle();
 
     if (error) {
-      console.error('Profile fetch error:', error);
+      console.error(
+        'Profile fetch error:',
+        error,
+      );
     }
 
     return {
@@ -126,7 +151,10 @@ export function AuthProvider({
         metadataName ||
         email.split('@')[0] ||
         'مستخدم',
-      role: profile?.role === 'admin' ? 'admin' : 'user',
+      role:
+        profile?.role === 'admin'
+          ? 'admin'
+          : 'user',
     };
   };
 
@@ -142,14 +170,23 @@ export function AuthProvider({
       };
     }
 
-    const { data, error } = await supabase
+    const {
+      data,
+      error,
+    } = await supabase
       .from('game_entitlements')
-      .select('package_type, games_remaining, unlimited')
+      .select(
+        'package_type, games_remaining, unlimited',
+      )
       .eq('user_id', userId)
       .maybeSingle();
 
     if (error) {
-      console.error('Entitlement fetch error:', error);
+      console.error(
+        'Entitlement fetch error:',
+        error,
+      );
+
       return emptyEntitlement;
     }
 
@@ -157,8 +194,14 @@ export function AuthProvider({
       packageType:
         (data?.package_type as GameEntitlement['packageType']) ||
         'none',
-      gamesRemaining: Number(data?.games_remaining || 0),
-      unlimited: Boolean(data?.unlimited),
+
+      gamesRemaining: Number(
+        data?.games_remaining || 0,
+      ),
+
+      unlimited: Boolean(
+        data?.unlimited,
+      ),
     };
   };
 
@@ -167,19 +210,24 @@ export function AuthProvider({
     email: string,
     metadataName?: string,
   ) => {
-    const currentUser = await getProfile(
-      userId,
-      email,
-      metadataName,
-    );
+    const currentUser =
+      await getProfile(
+        userId,
+        email,
+        metadataName,
+      );
 
-    const currentEntitlement = await getEntitlement(
-      userId,
-      currentUser.role,
-    );
+    const currentEntitlement =
+      await getEntitlement(
+        userId,
+        currentUser.role,
+      );
 
     setUser(currentUser);
-    setEntitlement(currentEntitlement);
+
+    setEntitlement(
+      currentEntitlement,
+    );
 
     return currentUser;
   };
@@ -194,19 +242,27 @@ export function AuthProvider({
         data: { session },
       } = await supabase.auth.getSession();
 
-      if (!isMounted) return;
+      if (!isMounted) {
+        return;
+      }
 
       if (!session?.user) {
         setUser(null);
-        setEntitlement(emptyEntitlement);
+
+        setEntitlement(
+          emptyEntitlement,
+        );
+
         setLoading(false);
+
         return;
       }
 
       await loadCurrentUser(
         session.user.id,
         session.user.email || '',
-        session.user.user_metadata?.full_name,
+        session.user.user_metadata
+          ?.full_name,
       );
 
       if (isMounted) {
@@ -218,56 +274,81 @@ export function AuthProvider({
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!session?.user) {
-        setUser(null);
-        setEntitlement(emptyEntitlement);
-        setLoading(false);
-        return;
-      }
+    } =
+      supabase.auth.onAuthStateChange(
+        (_event, session) => {
+          if (!session?.user) {
+            setUser(null);
 
-      setTimeout(async () => {
-        await loadCurrentUser(
-          session.user.id,
-          session.user.email || '',
-          session.user.user_metadata?.full_name,
-        );
+            setEntitlement(
+              emptyEntitlement,
+            );
 
-        if (isMounted) {
-          setLoading(false);
-        }
-      }, 0);
-    });
+            setLoading(false);
+
+            return;
+          }
+
+          window.setTimeout(
+            async () => {
+              await loadCurrentUser(
+                session.user.id,
+                session.user.email ||
+                  '',
+                session.user
+                  .user_metadata
+                  ?.full_name,
+              );
+
+              if (isMounted) {
+                setLoading(false);
+              }
+            },
+            0,
+          );
+        },
+      );
 
     return () => {
       isMounted = false;
+
       subscription.unsubscribe();
     };
   }, []);
 
-  const refreshEntitlement = async () => {
-    if (!user) {
-      setEntitlement(emptyEntitlement);
-      return;
-    }
+  const refreshEntitlement =
+    async () => {
+      if (!user) {
+        setEntitlement(
+          emptyEntitlement,
+        );
 
-    setEntitlementLoading(true);
+        return;
+      }
 
-    const currentEntitlement = await getEntitlement(
-      user.id,
-      user.role,
-    );
+      setEntitlementLoading(true);
 
-    setEntitlement(currentEntitlement);
-    setEntitlementLoading(false);
-  };
+      try {
+        const currentEntitlement =
+          await getEntitlement(
+            user.id,
+            user.role,
+          );
 
+        setEntitlement(
+          currentEntitlement,
+        );
+      } finally {
+        setEntitlementLoading(false);
+      }
+    };
+
+  /*
+   * إرسال رابط استعادة كلمة المرور
+   */
   const sendPasswordReset = async (
     email: string,
-  ): Promise<{
-    success: boolean;
-    error?: string;
-  }> => {
+  ): Promise<BasicResult> => {
     const cleanEmail = email
       .trim()
       .toLowerCase();
@@ -275,20 +356,26 @@ export function AuthProvider({
     if (!cleanEmail) {
       return {
         success: false,
-        error: 'أدخل البريد الإلكتروني أولًا.',
+        error:
+          'أدخل البريد الإلكتروني أولًا.',
       };
     }
 
+    /*
+     * نستخدم رابط الموقع الحقيقي مباشرة
+     * حتى لا يرجع إلى localhost.
+     */
     const redirectTo =
-      `${window.location.origin}/?reset-password=1`;
+      'https://medanyahmedan.me/?reset-password=1';
 
     const { error } =
-      await supabase.auth.resetPasswordForEmail(
-        cleanEmail,
-        {
-          redirectTo,
-        },
-      );
+      await supabase.auth
+        .resetPasswordForEmail(
+          cleanEmail,
+          {
+            redirectTo,
+          },
+        );
 
     if (error) {
       console.error(
@@ -308,12 +395,12 @@ export function AuthProvider({
     };
   };
 
+  /*
+   * تحديث كلمة المرور بعد فتح الرابط من البريد
+   */
   const updatePassword = async (
     password: string,
-  ): Promise<{
-    success: boolean;
-    error?: string;
-  }> => {
+  ): Promise<BasicResult> => {
     if (password.length < 6) {
       return {
         success: false,
@@ -336,7 +423,7 @@ export function AuthProvider({
       return {
         success: false,
         error:
-          'تعذر تحديث كلمة المرور. افتح الرابط من البريد مرة أخرى.',
+          'تعذر تحديث كلمة المرور. افتح أحدث رابط وصلك في البريد.',
       };
     }
 
@@ -345,111 +432,162 @@ export function AuthProvider({
     };
   };
 
-  const consumeGame = async (): Promise<ConsumeGameResult> => {
-    if (!user) {
-      return {
-        success: false,
-        code: 'login_required',
-        message: 'يجب تسجيل الدخول أولًا',
+  const consumeGame =
+    async (): Promise<ConsumeGameResult> => {
+      if (!user) {
+        return {
+          success: false,
+          code: 'login_required',
+          message:
+            'يجب تسجيل الدخول أولًا',
+        };
+      }
+
+      const {
+        data,
+        error,
+      } = await supabase.rpc(
+        'consume_game',
+      );
+
+      if (error) {
+        console.error(
+          'Consume game error:',
+          error,
+        );
+
+        return {
+          success: false,
+          message:
+            'تعذر بدء اللعبة، حاول مرة أخرى.',
+        };
+      }
+
+      const result = data as {
+        success?: boolean;
+        code?: string;
+        message?: string;
+        unlimited?: boolean;
+        games_remaining?:
+          | number
+          | null;
       };
-    }
 
-    const { data, error } = await supabase.rpc('consume_game');
+      if (result.success) {
+        setEntitlement(
+          (current) => ({
+            ...current,
 
-    if (error) {
-      console.error('Consume game error:', error);
+            unlimited:
+              result.unlimited ??
+              current.unlimited,
+
+            gamesRemaining:
+              typeof result.games_remaining ===
+              'number'
+                ? result.games_remaining
+                : current.gamesRemaining,
+          }),
+        );
+      }
 
       return {
-        success: false,
-        message: 'تعذر بدء اللعبة، حاول مرة أخرى.',
-      };
-    }
+        success: Boolean(
+          result.success,
+        ),
 
-    const result = data as {
-      success?: boolean;
-      code?: string;
-      message?: string;
-      unlimited?: boolean;
-      games_remaining?: number | null;
-    };
+        code: result.code,
 
-    if (result.success) {
-      setEntitlement((current) => ({
-        ...current,
+        message: result.message,
+
         unlimited:
-          result.unlimited ?? current.unlimited,
+          result.unlimited,
+
         gamesRemaining:
-          typeof result.games_remaining === 'number'
-            ? result.games_remaining
-            : current.gamesRemaining,
-      }));
-    }
-
-    return {
-      success: Boolean(result.success),
-      code: result.code,
-      message: result.message,
-      unlimited: result.unlimited,
-      gamesRemaining: result.games_remaining,
-    };
-  };
-
-  const createPackagePurchase = async (
-    packageId: string,
-    amountOmr: number,
-  ): Promise<CreatePurchaseResult> => {
-    if (!user) {
-      return {
-        success: false,
-        error: 'يجب تسجيل الدخول أولًا',
+          result.games_remaining,
       };
-    }
+    };
 
-    const { data, error } = await supabase
-      .from('package_purchases')
-      .insert({
-        user_id: user.id,
-        package_id: packageId,
-        amount_omr: amountOmr,
-        status: 'pending',
-      })
-      .select('id')
-      .single();
+  const createPackagePurchase =
+    async (
+      packageId: string,
+      amountOmr: number,
+    ): Promise<CreatePurchaseResult> => {
+      if (!user) {
+        return {
+          success: false,
+          error:
+            'يجب تسجيل الدخول أولًا',
+        };
+      }
 
-    if (error) {
-      console.error('Create package purchase error:', error);
+      const {
+        data,
+        error,
+      } = await supabase
+        .from('package_purchases')
+        .insert({
+          user_id: user.id,
+          package_id: packageId,
+          amount_omr: amountOmr,
+          status: 'pending',
+        })
+        .select('id')
+        .single();
+
+      if (error) {
+        console.error(
+          'Create package purchase error:',
+          error,
+        );
+
+        return {
+          success: false,
+          error:
+            'تعذر إنشاء طلب الشراء.',
+        };
+      }
 
       return {
-        success: false,
-        error: 'تعذر إنشاء طلب الشراء.',
+        success: true,
+        purchaseId: data.id,
       };
-    }
-
-    return {
-      success: true,
-      purchaseId: data.id,
     };
-  };
 
   const login = async (
     email: string,
     password: string,
   ): Promise<AppUser | null> => {
-    const { data, error } =
-      await supabase.auth.signInWithPassword({
-        email: email.trim().toLowerCase(),
-        password,
-      });
+    const {
+      data,
+      error,
+    } =
+      await supabase.auth
+        .signInWithPassword({
+          email: email
+            .trim()
+            .toLowerCase(),
 
-    if (error || !data.user) {
-      console.error('Login error:', error);
+          password,
+        });
+
+    if (
+      error ||
+      !data.user
+    ) {
+      console.error(
+        'Login error:',
+        error,
+      );
+
       return null;
     }
 
     return loadCurrentUser(
       data.user.id,
       data.user.email || '',
-      data.user.user_metadata?.full_name,
+      data.user.user_metadata
+        ?.full_name,
     );
   };
 
@@ -458,55 +596,91 @@ export function AuthProvider({
     email: string,
     password: string,
   ): Promise<AppUser | null> => {
-    const cleanName = name.trim();
-    const cleanEmail = email.trim().toLowerCase();
+    const cleanName =
+      name.trim();
 
-    const response = await supabase.auth.signUp({
-      email: cleanEmail,
-      password,
-      options: {
-        data: {
-          full_name: cleanName,
+    const cleanEmail = email
+      .trim()
+      .toLowerCase();
+
+    const response =
+      await supabase.auth.signUp({
+        email: cleanEmail,
+
+        password,
+
+        options: {
+          data: {
+            full_name:
+              cleanName,
+          },
+
+          emailRedirectTo:
+            'https://medanyahmedan.me',
         },
-        emailRedirectTo: window.location.origin,
-      },
-    });
+      });
 
     if (response.error) {
-      throw new Error(response.error.message);
+      throw new Error(
+        response.error.message,
+      );
     }
 
     if (!response.data.user) {
-      throw new Error('لم يُرجع Supabase مستخدمًا.');
+      throw new Error(
+        'لم يُرجع Supabase مستخدمًا.',
+      );
     }
 
     const newUser: AppUser = {
       id: response.data.user.id,
-      email: response.data.user.email || cleanEmail,
+
+      email:
+        response.data.user.email ||
+        cleanEmail,
+
       name: cleanName,
+
       role: 'user',
     };
 
     if (response.data.session) {
       setUser(newUser);
-      setEntitlement(emptyEntitlement);
-      await refreshEntitlement();
+
+      const currentEntitlement =
+        await getEntitlement(
+          newUser.id,
+          newUser.role,
+        );
+
+      setEntitlement(
+        currentEntitlement,
+      );
     }
 
     return newUser;
   };
 
-  const logout = async (): Promise<void> => {
-    const { error } = await supabase.auth.signOut();
+  const logout =
+    async (): Promise<void> => {
+      const { error } =
+        await supabase.auth.signOut();
 
-    if (error) {
-      console.error('Logout error:', error);
-      return;
-    }
+      if (error) {
+        console.error(
+          'Logout error:',
+          error,
+        );
 
-    setUser(null);
-    setEntitlement(emptyEntitlement);
-  };
+        return;
+      }
+
+      setUser(null);
+
+      setEntitlement(
+        emptyEntitlement,
+      );
+    };
 
   return (
     <AuthContext.Provider
@@ -518,12 +692,16 @@ export function AuthProvider({
         login,
         register,
         logout,
+
         sendPasswordReset,
         updatePassword,
+
         refreshEntitlement,
         consumeGame,
         createPackagePurchase,
-        isAdmin: user?.role === 'admin',
+
+        isAdmin:
+          user?.role === 'admin',
       }}
     >
       {children}
@@ -532,7 +710,8 @@ export function AuthProvider({
 }
 
 export function useAuth(): AuthContextType {
-  const context = useContext(AuthContext);
+  const context =
+    useContext(AuthContext);
 
   if (!context) {
     throw new Error(
