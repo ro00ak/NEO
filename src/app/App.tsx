@@ -44,7 +44,15 @@ type Page =
   | 'pricing';
 
 export default function App() {
-  const [currentPage, setCurrentPage] = useState<Page>('home');
+  const [currentPage, setCurrentPage] = useState<Page>(() => {
+    const params = new URLSearchParams(
+      window.location.search,
+    );
+
+    return params.get('reset-password') === '1'
+      ? 'login'
+      : 'home';
+  });
 
   const handleNavigate = (page: string) => {
     setCurrentPage(page as Page);
