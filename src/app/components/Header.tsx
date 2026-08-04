@@ -117,7 +117,7 @@ export default function Header({
     : entitlementLoading
       ? 'جاري التحميل'
       : isGold
-        ? 'الباقة الملكية'
+        ? 'الباقة الذهبية'
         : entitlement.gamesRemaining === 0
           ? 'الرصيد صفر'
           : entitlement.gamesRemaining === 1
@@ -142,33 +142,33 @@ export default function Header({
       onClick={() =>
         navigate(user ? 'account' : 'pricing')
       }
-      className={`inline-flex items-center justify-center gap-2 rounded-2xl border font-black transition-all duration-300 hover:scale-[1.02] ${
+      className={`inline-flex items-center justify-center gap-2 rounded-2xl border font-black transition hover:-translate-y-0.5 ${
         mobile
-          ? 'h-10 max-w-[102px] px-2.5 text-[10px]'
-          : 'h-14 min-w-[165px] px-4 text-sm'
+          ? 'h-10 max-w-[92px] px-2 text-[9px]'
+          : 'h-14 min-w-[150px] px-4 text-sm'
       } ${
         isGold
-          ? 'border-cyan-400/50 bg-gradient-to-r from-indigo-950 via-purple-900 to-indigo-950 text-cyan-200 shadow-[0_0_20px_rgba(6,182,212,0.25)] hover:shadow-[0_0_25px_rgba(6,182,212,0.4)]'
-          : 'border-purple-500/30 bg-gradient-to-r from-purple-950/90 to-indigo-950/90 text-purple-200 shadow-[0_4px_15px_rgba(0,0,0,0.3)]'
+          ? 'border-[#FFD84D]/80 bg-gradient-to-b from-[#78590A] via-[#523B04] to-[#2B1B00] text-[#FFF1A8] shadow-[0_5px_0_#5E4303,0_10px_25px_rgba(255,216,77,0.3)]'
+          : 'border-[#7D70D9]/45 bg-gradient-to-b from-[#302A68] to-[#211A4D] text-white shadow-[0_4px_0_#151132]'
       }`}
     >
       {isGold ? (
         <Crown
           className={
-            mobile ? 'h-4 w-4 text-cyan-400 animate-pulse' : 'h-5 w-5 text-cyan-400 animate-pulse'
+            mobile ? 'h-4 w-4 text-[#FFD84D]' : 'h-5 w-5 text-[#FFD84D]'
           }
         />
       ) : (
         <Gamepad2
           className={
             mobile
-              ? 'h-4 w-4 text-purple-400'
-              : 'h-5 w-5 text-purple-400'
+              ? 'h-4 w-4 text-[#FACC15]'
+              : 'h-5 w-5 text-[#FACC15]'
           }
         />
       )}
 
-      <span className="truncate tracking-wide">{packageText}</span>
+      <span className="truncate">{packageText}</span>
     </button>
   );
 
@@ -190,22 +190,24 @@ export default function Header({
         }
         className={
           mobile
-            ? 'flex h-10 items-center gap-1.5 rounded-xl border border-purple-500/30 bg-gradient-to-r from-indigo-950 to-purple-950 px-2.5 shadow-md text-white font-bold'
-            : 'flex h-11 min-w-[125px] items-center justify-between gap-2 rounded-2xl border border-purple-500/30 bg-gradient-to-r from-indigo-950/90 to-purple-950/90 px-3.5 font-black text-white shadow-lg transition-all hover:border-cyan-500/50 hover:shadow-cyan-500/10'
+            ? 'flex h-10 w-10 items-center justify-center rounded-xl border border-[#7569CB]/50 bg-gradient-to-b from-[#302A68] to-[#211A4D] shadow-[0_3px_0_#151132]'
+            : 'flex h-11 min-w-[112px] items-center justify-center gap-2 rounded-2xl border border-[#7D70D9]/55 bg-gradient-to-b from-[#39337A] to-[#27215C] px-3.5 font-black text-white shadow-[0_4px_0_#17133A] transition hover:-translate-y-1'
         }
       >
-        <div className="flex items-center gap-2">
-          <img
-            src={currency.flagUrl}
-            alt={currency.name}
-            className="h-6 w-6 rounded-full border border-purple-300/40 bg-white object-contain p-[1px] shadow-sm"
-          />
-          <span className="text-sm tracking-wider font-extrabold">
-            {currency.code}
-          </span>
-        </div>
+        <img
+          src={currency.flagUrl}
+          alt={currency.name}
+          className="h-6 w-6 rounded-full border border-white/60 bg-white object-contain p-[1px]"
+        />
 
-        <ChevronDown className={`h-4 w-4 text-cyan-400 transition-transform duration-300 ${currencyMenuOpen ? 'rotate-180' : ''}`} />
+        {!mobile && (
+          <>
+            <span className="text-sm">
+              {currency.code}
+            </span>
+            <ChevronDown className="h-4 w-4 text-[#FACC15]" />
+          </>
+        )}
       </button>
 
       <AnimatePresence>
@@ -213,8 +215,8 @@ export default function Header({
           <motion.div
             initial={{
               opacity: 0,
-              y: -10,
-              scale: 0.95,
+              y: -8,
+              scale: 0.97,
             }}
             animate={{
               opacity: 1,
@@ -223,18 +225,18 @@ export default function Header({
             }}
             exit={{
               opacity: 0,
-              y: -8,
-              scale: 0.95,
+              y: -6,
+              scale: 0.98,
             }}
             dir="rtl"
-            className={`absolute top-[calc(100%+12px)] z-[120] rounded-[24px] border border-purple-500/30 bg-[#120728]/95 p-3.5 text-white backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.7)] ${
+            className={`absolute top-[calc(100%+12px)] z-[120] rounded-[24px] border border-[#8D7DF0]/45 bg-[#F5F3FC] p-3 text-[#25183F] shadow-[0_24px_55px_rgba(5,0,20,0.42)] ${
               mobile
                 ? 'left-1/2 w-[292px] -translate-x-1/2'
                 : 'left-0 w-[330px]'
             }`}
           >
-            <p className="mb-3 text-xs font-black tracking-wider text-purple-300 uppercase px-1">
-              اختر العملة المفضلة
+            <p className="mb-3 text-sm font-black text-[#28104B]">
+              اختر العملة
             </p>
 
             <div className="grid grid-cols-2 gap-2">
@@ -251,23 +253,23 @@ export default function Header({
                         item.code as CurrencyCode,
                       )
                     }
-                    className={`flex min-h-[52px] items-center gap-2.5 rounded-2xl border px-3 py-2 text-right transition-all ${
+                    className={`flex min-h-[56px] items-center gap-2 rounded-2xl border px-2.5 py-2 text-right ${
                       selected
-                        ? 'border-cyan-400/60 bg-gradient-to-r from-purple-900/80 to-indigo-900/80 shadow-[0_0_15px_rgba(6,182,212,0.2)]'
-                        : 'border-white/10 bg-white/[0.03] hover:bg-white/[0.08]'
+                        ? 'border-[#5B3FC4] bg-[#E8E1FF]'
+                        : 'border-[#D2CDE3] bg-white'
                     }`}
                   >
                     <img
                       src={item.flagUrl}
                       alt={item.name}
-                      className="h-7 w-7 shrink-0 rounded-full border border-white/20 bg-white object-contain p-[1px]"
+                      className="h-7 w-7 shrink-0 rounded-full border border-[#D7D4E2] bg-white object-contain p-[1px]"
                     />
 
                     <span className="min-w-0">
-                      <span className="block text-xs font-black text-white">
+                      <span className="block text-xs font-black">
                         {item.code}
                       </span>
-                      <span className="block truncate text-[10px] font-medium text-purple-300/70">
+                      <span className="block truncate text-[9px] font-bold text-[#28104B]/55">
                         {item.name}
                       </span>
                     </span>
@@ -284,10 +286,10 @@ export default function Header({
   return (
     <>
       {/* هيدر الكمبيوتر */}
-      <header className="fixed inset-x-0 top-0 z-50 hidden bg-transparent px-6 pt-5 text-white lg:block">
+      <header className="fixed inset-x-0 top-0 z-50 hidden bg-transparent px-5 pt-4 text-white lg:block">
         <div
           dir="ltr"
-          className="relative mx-auto grid min-h-[84px] max-w-[1320px] grid-cols-[1fr_auto_1fr] items-center gap-4 overflow-visible rounded-[30px] border border-purple-500/30 bg-[linear-gradient(135deg,rgba(15,5,32,0.95),rgba(26,9,56,0.92))] px-6 py-3 shadow-[0_15px_40px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.1)] backdrop-blur-2xl"
+          className="relative mx-auto grid min-h-[78px] max-w-[1280px] grid-cols-[1fr_auto_1fr] items-center gap-4 overflow-visible rounded-[28px] border border-[#8B7AE0]/50 bg-[linear-gradient(135deg,rgba(18,8,42,0.98),rgba(33,12,71,0.96))] px-5 py-3 shadow-[0_12px_35px_rgba(10,4,25,0.65),inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur-xl"
         >
           <div className="justify-self-start">
             <PackageBadge />
@@ -295,14 +297,14 @@ export default function Header({
 
           <nav
             dir="rtl"
-            className="flex items-center gap-1.5 rounded-2xl border border-white/10 bg-black/20 p-1.5 shadow-inner"
+            className="flex items-center gap-2 rounded-2xl border border-white/[0.08] bg-black/15 p-1.5 shadow-inner"
           >
             {navigationItems.map((item) => (
               <button
                 key={item.page}
                 type="button"
                 onClick={() => navigate(item.page)}
-                className="rounded-xl px-5 py-2.5 text-sm font-black text-purple-200/80 transition-all duration-300 hover:bg-gradient-to-r hover:from-purple-600/30 hover:to-indigo-600/30 hover:text-white hover:shadow-sm"
+                className="rounded-xl px-5 py-2.5 text-sm font-black text-white/85 transition-all hover:bg-white/10 hover:text-[#FFD84D]"
               >
                 {item.label}
               </button>
@@ -311,19 +313,19 @@ export default function Header({
 
           <div
             dir="rtl"
-            className="flex items-center justify-self-end gap-3"
+            className="flex items-center justify-self-end gap-2.5"
           >
             <button
               type="button"
               onClick={openAccount}
-              className="inline-flex h-12 max-w-[200px] items-center gap-2.5 rounded-2xl border border-cyan-400/40 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 px-5 font-black text-white shadow-[0_4px_20px_rgba(124,58,237,0.4)] transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_4px_25px_rgba(6,182,212,0.5)]"
+              className="inline-flex h-11 max-w-[190px] items-center gap-2.5 rounded-2xl border border-[#FFD84D]/45 bg-gradient-to-b from-[#FFDE69] to-[#E6A900] px-5 font-black text-[#2B1B00] shadow-[0_5px_0_#9E7500,0_10px_20px_rgba(255,222,105,0.25)] transition hover:-translate-y-0.5"
             >
               {user ? (
-                <UserRound className="h-4 w-4 shrink-0 text-cyan-300" />
+                <UserRound className="h-4 w-4 shrink-0 text-[#2B1B00]" />
               ) : (
-                <LogIn className="h-4 w-4 shrink-0 text-cyan-300" />
+                <LogIn className="h-4 w-4 shrink-0 text-[#2B1B00]" />
               )}
-              <span className="truncate tracking-wide">
+              <span className="truncate">
                 {accountLabel}
               </span>
             </button>
@@ -331,7 +333,7 @@ export default function Header({
             <button
               type="button"
               onClick={openAccount}
-              className="flex h-12 w-12 items-center justify-center rounded-2xl border border-purple-500/30 bg-gradient-to-b from-purple-950 to-indigo-950 text-cyan-400 shadow-md transition-all hover:border-cyan-400/50"
+              className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#7D70D9]/45 bg-gradient-to-b from-[#302A68] to-[#211A4D] text-[#FFD84D] shadow-[0_4px_0_#151132]"
             >
               <UserRound className="h-5 w-5" />
             </button>
@@ -343,25 +345,25 @@ export default function Header({
 
       {/* هيدر الجوال */}
       <header className="fixed inset-x-0 top-0 z-50 px-3 pt-3 text-white lg:hidden">
-        <div className="mx-auto flex min-h-[66px] items-center justify-between gap-2 rounded-[22px] border border-purple-500/30 bg-[linear-gradient(135deg,rgba(15,5,32,0.96),rgba(26,9,56,0.95))] px-3 py-2.5 shadow-[0_10px_30px_rgba(0,0,0,0.5)] backdrop-blur-xl">
+        <div className="mx-auto flex min-h-[62px] items-center justify-between gap-1.5 rounded-[21px] border border-[#8B7AE0]/50 bg-[linear-gradient(135deg,rgba(16,7,37,0.98),rgba(30,11,66,0.96))] px-2.5 py-2.5 shadow-[0_8px_25px_rgba(10,4,25,0.6)] backdrop-blur-xl">
           <button
             type="button"
             onClick={openAccount}
-            className="inline-flex h-10 max-w-[110px] items-center justify-center gap-1.5 rounded-xl border border-cyan-400/30 bg-gradient-to-r from-purple-600 to-indigo-600 px-2.5 font-black text-white shadow-md"
+            className="inline-flex h-10 max-w-[105px] items-center justify-center gap-1.5 rounded-xl border border-[#FFD84D]/40 bg-gradient-to-b from-[#FFDE69] to-[#E6A900] px-2.5 font-black text-[#2B1B00] shadow-[0_3px_0_#9E7500]"
           >
             {user ? (
-              <UserRound className="h-3.5 w-3.5 shrink-0 text-cyan-300" />
+              <UserRound className="h-3.5 w-3.5 shrink-0 text-[#2B1B00]" />
             ) : (
-              <LogIn className="h-3.5 w-3.5 shrink-0 text-cyan-300" />
+              <LogIn className="h-3.5 w-3.5 shrink-0 text-[#2B1B00]" />
             )}
-            <span className="truncate text-[10px] tracking-wide">
+            <span className="truncate text-[10px]">
               {accountLabel}
             </span>
           </button>
 
           <PackageBadge mobile />
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             <CurrencyMenu mobile />
 
             <button
@@ -371,7 +373,7 @@ export default function Header({
                   (current) => !current,
                 )
               }
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-purple-500/30 bg-gradient-to-b from-purple-950 to-indigo-950 text-cyan-400 shadow-md"
+              className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#7569CB]/50 bg-gradient-to-b from-[#302A68] to-[#211A4D] text-[#FFD84D] shadow-[0_3px_0_#151132]"
             >
               {mobileMenuOpen ? (
                 <X className="h-5 w-5" />
@@ -394,7 +396,7 @@ export default function Header({
               onClick={() =>
                 setMobileMenuOpen(false)
               }
-              className="fixed inset-0 z-[55] bg-black/70 backdrop-blur-sm lg:hidden"
+              className="fixed inset-0 z-[55] bg-black/60 backdrop-blur-sm lg:hidden"
             />
 
             <motion.aside
@@ -402,11 +404,11 @@ export default function Header({
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
-              className="fixed bottom-0 right-0 top-0 z-[60] w-[85%] max-w-[340px] border-l border-purple-500/30 bg-[linear-gradient(160deg,#0f0520,#1a0938)] px-5 pb-6 pt-6 shadow-[-20px_0_50px_rgba(0,0,0,0.7)] lg:hidden"
+              className="fixed bottom-0 right-0 top-0 z-[60] w-[82%] max-w-[330px] border-l border-[#8B7AE0]/40 bg-[linear-gradient(160deg,#180934,#280E55)] px-4 pb-6 pt-5 shadow-[-18px_0_60px_rgba(0,0,0,0.5)] lg:hidden"
             >
-              <div className="mb-8 flex items-center justify-between border-b border-white/10 pb-4">
-                <h2 className="text-lg font-black tracking-wider text-cyan-300">
-                  قائمة التصفح
+              <div className="mb-7 flex items-center justify-between">
+                <h2 className="text-lg font-black text-[#FFD84D]">
+                  القائمة
                 </h2>
 
                 <button
@@ -414,7 +416,7 @@ export default function Header({
                   onClick={() =>
                     setMobileMenuOpen(false)
                   }
-                  className="flex h-10 w-10 items-center justify-center rounded-xl border border-purple-500/30 bg-purple-950/60 text-cyan-400 shadow-sm"
+                  className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.06] text-[#FFD84D]"
                 >
                   <X className="h-5 w-5" />
                 </button>
@@ -428,7 +430,7 @@ export default function Header({
                     onClick={() =>
                       navigate(item.page)
                     }
-                    className="rounded-2xl border border-purple-500/20 bg-white/[0.04] px-5 py-4 text-right font-black text-white/90 transition-all active:scale-[0.98] hover:border-cyan-400/40 hover:bg-white/[0.08] hover:text-cyan-300"
+                    className="rounded-2xl border border-white/10 bg-white/[0.055] px-5 py-4 text-right font-black text-white/90 transition hover:border-[#FFD84D]/40 hover:text-[#FFD84D]"
                   >
                     {item.label}
                   </button>
