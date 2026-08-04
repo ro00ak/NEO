@@ -58,6 +58,18 @@ interface AuthContextType {
     password: string,
   ) => Promise<AppUser | null>;
   logout: () => Promise<void>;
+  sendPasswordReset: (
+    email: string,
+  ) => Promise<{
+    success: boolean;
+    error?: string;
+  }>;
+  updatePassword: (
+    password: string,
+  ) => Promise<{
+    success: boolean;
+    error?: string;
+  }>;
   refreshEntitlement: () => Promise<void>;
   consumeGame: () => Promise<ConsumeGameResult>;
   createPackagePurchase: (
@@ -250,6 +262,89 @@ export function AuthProvider({
     setEntitlementLoading(false);
   };
 
+  const sendPasswordReset = async (
+    email: string,
+  ): Promise<{
+    success: boolean;
+    error?: string;
+  }> => {
+    const cleanEmail = email
+      .trim()
+      .toLowerCase();
+
+    if (!cleanEmail) {
+      return {
+        success: false,
+        error: 'أدخل البريد الإلكتروني أولًا.',
+      };
+    }
+
+    const redirectTo =
+      `${window.location.origin}/?reset-password=1`;
+
+    const { error } =
+      await supabase.auth.resetPasswordForEmail(
+        cleanEmail,
+        {
+          redirectTo,
+        },
+      );
+
+    if (error) {
+      console.error(
+        'Password reset error:',
+        error,
+      );
+
+      return {
+        success: false,
+        error:
+          'تعذر إرسال رابط الاستعادة. حاول مرة أخرى.',
+      };
+    }
+
+    return {
+      success: true,
+    };
+  };
+
+  const updatePassword = async (
+    password: string,
+  ): Promise<{
+    success: boolean;
+    error?: string;
+  }> => {
+    if (password.length < 6) {
+      return {
+        success: false,
+        error:
+          'يجب أن تكون كلمة المرور 6 أحرف على الأقل.',
+      };
+    }
+
+    const { error } =
+      await supabase.auth.updateUser({
+        password,
+      });
+
+    if (error) {
+      console.error(
+        'Update password error:',
+        error,
+      );
+
+      return {
+        success: false,
+        error:
+          'تعذر تحديث كلمة المرور. افتح الرابط من البريد مرة أخرى.',
+      };
+    }
+
+    return {
+      success: true,
+    };
+  };
+
   const consumeGame = async (): Promise<ConsumeGameResult> => {
     if (!user) {
       return {
@@ -423,6 +518,8 @@ export function AuthProvider({
         login,
         register,
         logout,
+        sendPasswordReset,
+        updatePassword,
         refreshEntitlement,
         consumeGame,
         createPackagePurchase,
