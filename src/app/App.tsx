@@ -50,7 +50,7 @@ export default function App() {
     setCurrentPage(page as Page);
     window.scrollTo({
       top: 0,
-      behavior: 'smooth',
+      behavior: 'auto',
     });
   };
 
