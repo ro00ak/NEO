@@ -1,10 +1,12 @@
 import {
   type FormEvent,
+  useMemo,
   useRef,
   useState,
 } from 'react';
 import {
   ArrowRight,
+  CheckCircle2,
   Eye,
   EyeOff,
   Loader2,
@@ -38,14 +40,34 @@ const emptyForm: FormData = {
 export default function Login({
   onSuccess,
 }: LoginProps) {
-  const { login, register } = useAuth();
+  const {
+    login,
+    register,
+    sendPasswordReset,
+    updatePassword,
+  } = useAuth();
 
-  const [isLogin, setIsLogin] = useState(true);
+  const resetMode = useMemo(() => {
+    const params = new URLSearchParams(
+      window.location.search,
+    );
+
+    return params.get('reset-password') === '1';
+  }, []);
+
+  const [mode, setMode] = useState<
+    'login' | 'register' | 'forgot' | 'reset'
+  >(resetMode ? 'reset' : 'login');
+
   const [showPassword, setShowPassword] =
     useState(false);
+
   const [formData, setFormData] =
     useState<FormData>(emptyForm);
+
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] =
+    useState('');
   const [loading, setLoading] = useState(false);
 
   const emailInputRef =
@@ -61,20 +83,131 @@ export default function Login({
     }));
   };
 
+  const changeMode = (
+    nextMode: 'login' | 'register' | 'forgot',
+  ) => {
+    if (loading) {
+      return;
+    }
+
+    setMode(nextMode);
+    setShowPassword(false);
+    setError('');
+    setSuccessMessage('');
+    setFormData(emptyForm);
+
+    window.requestAnimationFrame(() => {
+      emailInputRef.current?.focus({
+        preventScroll: true,
+      });
+    });
+  };
+
   const handleSubmit = async (
     event: FormEvent<HTMLFormElement>,
   ) => {
     event.preventDefault();
 
-    if (loading) return;
+    if (loading) {
+      return;
+    }
 
     setError('');
+    setSuccessMessage('');
 
     const cleanName = formData.name.trim();
+
     const email = formData.email
       .trim()
       .toLowerCase();
+
     const password = formData.password;
+
+    if (mode === 'forgot') {
+      if (!email) {
+        setError(
+          'أدخل البريد الإلكتروني أولًا.',
+        );
+        return;
+      }
+
+      setLoading(true);
+
+      const result =
+        await sendPasswordReset(email);
+
+      setLoading(false);
+
+      if (!result.success) {
+        setError(
+          result.error ||
+            'تعذر إرسال رابط الاستعادة.',
+        );
+        return;
+      }
+
+      setSuccessMessage(
+        'تم إرسال رابط تغيير كلمة المرور إلى بريدك الإلكتروني. افحص البريد الوارد والرسائل غير المرغوبة.',
+      );
+
+      return;
+    }
+
+    if (mode === 'reset') {
+      if (!password) {
+        setError(
+          'أدخل كلمة المرور الجديدة.',
+        );
+        return;
+      }
+
+      if (password.length < 6) {
+        setError(
+          'يجب أن تكون كلمة المرور 6 أحرف على الأقل.',
+        );
+        return;
+      }
+
+      if (
+        password !==
+        formData.confirmPassword
+      ) {
+        setError(
+          'كلمتا المرور غير متطابقتين.',
+        );
+        return;
+      }
+
+      setLoading(true);
+
+      const result =
+        await updatePassword(password);
+
+      setLoading(false);
+
+      if (!result.success) {
+        setError(
+          result.error ||
+            'تعذر تحديث كلمة المرور.',
+        );
+        return;
+      }
+
+      window.history.replaceState(
+        {},
+        '',
+        window.location.pathname,
+      );
+
+      setSuccessMessage(
+        'تم تغيير كلمة المرور بنجاح. يمكنك تسجيل الدخول الآن.',
+      );
+
+      setFormData(emptyForm);
+      setMode('login');
+
+      return;
+    }
 
     if (!email || !password) {
       setError(
@@ -83,7 +216,7 @@ export default function Login({
       return;
     }
 
-    if (!isLogin) {
+    if (mode === 'register') {
       if (cleanName.length < 2) {
         setError('أدخل اسمًا صحيحًا.');
         return;
@@ -96,8 +229,13 @@ export default function Login({
         return;
       }
 
-      if (password !== formData.confirmPassword) {
-        setError('كلمتا المرور غير متطابقتين.');
+      if (
+        password !==
+        formData.confirmPassword
+      ) {
+        setError(
+          'كلمتا المرور غير متطابقتين.',
+        );
         return;
       }
     }
@@ -105,7 +243,7 @@ export default function Login({
     setLoading(true);
 
     try {
-      if (isLogin) {
+      if (mode === 'login') {
         const currentUser = await login(
           email,
           password,
@@ -123,6 +261,7 @@ export default function Login({
             ? 'admin'
             : 'user',
         );
+
         return;
       }
 
@@ -141,7 +280,10 @@ export default function Login({
 
       onSuccess('user');
     } catch (caughtError) {
-      console.error('Auth error:', caughtError);
+      console.error(
+        'Auth error:',
+        caughtError,
+      );
 
       setError(
         caughtError instanceof Error
@@ -153,20 +295,23 @@ export default function Login({
     }
   };
 
-  const toggleMode = () => {
-    if (loading) return;
+  const title =
+    mode === 'login'
+      ? 'تسجيل الدخول'
+      : mode === 'register'
+        ? 'إنشاء حساب جديد'
+        : mode === 'forgot'
+          ? 'استعادة كلمة المرور'
+          : 'كلمة مرور جديدة';
 
-    setIsLogin((current) => !current);
-    setShowPassword(false);
-    setError('');
-    setFormData(emptyForm);
-
-    window.requestAnimationFrame(() => {
-      emailInputRef.current?.focus({
-        preventScroll: true,
-      });
-    });
-  };
+  const description =
+    mode === 'login'
+      ? 'سجّل دخولك للوصول إلى ألعابك وبيانات حسابك.'
+      : mode === 'register'
+        ? 'أنشئ حسابك وابدأ تجهيز ميدانك.'
+        : mode === 'forgot'
+          ? 'أدخل بريدك وسنرسل لك رابط تغيير كلمة المرور.'
+          : 'أدخل كلمة المرور الجديدة لحسابك.';
 
   return (
     <main
@@ -186,15 +331,11 @@ export default function Login({
           />
 
           <h1 className="mt-5 text-3xl font-black">
-            {isLogin
-              ? 'تسجيل الدخول'
-              : 'إنشاء حساب جديد'}
+            {title}
           </h1>
 
           <p className="mt-3 text-sm leading-7 text-white/60">
-            {isLogin
-              ? 'سجّل دخولك للوصول إلى ألعابك وبيانات حسابك.'
-              : 'أنشئ حسابك وابدأ تجهيز ميدانك.'}
+            {description}
           </p>
         </div>
 
@@ -207,14 +348,24 @@ export default function Login({
           </div>
         )}
 
+        {successMessage && (
+          <div className="mt-5 flex items-start gap-3 rounded-2xl border border-green-400/25 bg-green-500/15 px-4 py-3 text-sm font-bold leading-6 text-green-100">
+            <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0" />
+
+            {successMessage}
+          </div>
+        )}
+
         <form
           onSubmit={handleSubmit}
           className="mt-6 space-y-4"
         >
-          {!isLogin && (
+          {mode === 'register' && (
             <Field
               label="الاسم"
-              icon={<User className="h-5 w-5" />}
+              icon={
+                <User className="h-5 w-5" />
+              }
             >
               <input
                 type="text"
@@ -228,94 +379,51 @@ export default function Login({
                 placeholder="أدخل اسمك"
                 maxLength={50}
                 autoComplete="name"
-                enterKeyHint="next"
                 disabled={loading}
-                className="h-14 w-full touch-manipulation bg-transparent pr-12 pl-4 text-base font-bold text-white outline-none placeholder:text-white/35 disabled:opacity-60"
+                className="h-14 w-full touch-manipulation bg-transparent pr-12 pl-4 text-base font-bold text-white outline-none placeholder:text-white/35"
               />
             </Field>
           )}
 
-          <Field
-            label="البريد الإلكتروني"
-            icon={<Mail className="h-5 w-5" />}
-          >
-            <input
-              ref={emailInputRef}
-              type="email"
-              inputMode="email"
-              value={formData.email}
-              onChange={(event) =>
-                updateField(
-                  'email',
-                  event.target.value,
-                )
-              }
-              placeholder="example@email.com"
-              autoComplete="email"
-              autoCapitalize="none"
-              autoCorrect="off"
-              spellCheck={false}
-              enterKeyHint="next"
-              disabled={loading}
-              className="h-14 w-full touch-manipulation bg-transparent pr-12 pl-4 text-left text-base font-bold text-white outline-none placeholder:text-white/35 disabled:opacity-60"
-            />
-          </Field>
-
-          <Field
-            label="كلمة المرور"
-            icon={<Lock className="h-5 w-5" />}
-          >
-            <input
-              type={
-                showPassword ? 'text' : 'password'
-              }
-              value={formData.password}
-              onChange={(event) =>
-                updateField(
-                  'password',
-                  event.target.value,
-                )
-              }
-              placeholder="أدخل كلمة المرور"
-              autoComplete={
-                isLogin
-                  ? 'current-password'
-                  : 'new-password'
-              }
-              enterKeyHint={
-                isLogin ? 'go' : 'next'
-              }
-              disabled={loading}
-              className="h-14 w-full touch-manipulation bg-transparent pr-12 pl-12 text-base font-bold text-white outline-none placeholder:text-white/35 disabled:opacity-60"
-            />
-
-            <button
-              type="button"
-              onClick={() =>
-                setShowPassword(
-                  (current) => !current,
-                )
-              }
-              disabled={loading}
-              className="absolute left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 touch-manipulation items-center justify-center rounded-xl text-white/45 active:bg-white/10 disabled:opacity-50"
-              aria-label={
-                showPassword
-                  ? 'إخفاء كلمة المرور'
-                  : 'إظهار كلمة المرور'
+          {mode !== 'reset' && (
+            <Field
+              label="البريد الإلكتروني"
+              icon={
+                <Mail className="h-5 w-5" />
               }
             >
-              {showPassword ? (
-                <EyeOff className="h-5 w-5" />
-              ) : (
-                <Eye className="h-5 w-5" />
-              )}
-            </button>
-          </Field>
+              <input
+                ref={emailInputRef}
+                type="email"
+                inputMode="email"
+                value={formData.email}
+                onChange={(event) =>
+                  updateField(
+                    'email',
+                    event.target.value,
+                  )
+                }
+                placeholder="example@email.com"
+                autoComplete="email"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                disabled={loading}
+                className="h-14 w-full touch-manipulation bg-transparent pr-12 pl-4 text-left text-base font-bold text-white outline-none placeholder:text-white/35"
+              />
+            </Field>
+          )}
 
-          {!isLogin && (
+          {mode !== 'forgot' && (
             <Field
-              label="تأكيد كلمة المرور"
-              icon={<Lock className="h-5 w-5" />}
+              label={
+                mode === 'reset'
+                  ? 'كلمة المرور الجديدة'
+                  : 'كلمة المرور'
+              }
+              icon={
+                <Lock className="h-5 w-5" />
+              }
             >
               <input
                 type={
@@ -323,7 +431,67 @@ export default function Login({
                     ? 'text'
                     : 'password'
                 }
-                value={formData.confirmPassword}
+                value={formData.password}
+                onChange={(event) =>
+                  updateField(
+                    'password',
+                    event.target.value,
+                  )
+                }
+                placeholder={
+                  mode === 'reset'
+                    ? 'أدخل كلمة المرور الجديدة'
+                    : 'أدخل كلمة المرور'
+                }
+                autoComplete={
+                  mode === 'login'
+                    ? 'current-password'
+                    : 'new-password'
+                }
+                disabled={loading}
+                className="h-14 w-full touch-manipulation bg-transparent pr-12 pl-12 text-base font-bold text-white outline-none placeholder:text-white/35"
+              />
+
+              <button
+                type="button"
+                onClick={() =>
+                  setShowPassword(
+                    (current) => !current,
+                  )
+                }
+                className="absolute left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-xl text-white/45"
+                aria-label={
+                  showPassword
+                    ? 'إخفاء كلمة المرور'
+                    : 'إظهار كلمة المرور'
+                }
+              >
+                {showPassword ? (
+                  <EyeOff className="h-5 w-5" />
+                ) : (
+                  <Eye className="h-5 w-5" />
+                )}
+              </button>
+            </Field>
+          )}
+
+          {(mode === 'register' ||
+            mode === 'reset') && (
+            <Field
+              label="تأكيد كلمة المرور"
+              icon={
+                <Lock className="h-5 w-5" />
+              }
+            >
+              <input
+                type={
+                  showPassword
+                    ? 'text'
+                    : 'password'
+                }
+                value={
+                  formData.confirmPassword
+                }
                 onChange={(event) =>
                   updateField(
                     'confirmPassword',
@@ -332,18 +500,20 @@ export default function Login({
                 }
                 placeholder="أعد كتابة كلمة المرور"
                 autoComplete="new-password"
-                enterKeyHint="go"
                 disabled={loading}
-                className="h-14 w-full touch-manipulation bg-transparent pr-12 pl-4 text-base font-bold text-white outline-none placeholder:text-white/35 disabled:opacity-60"
+                className="h-14 w-full touch-manipulation bg-transparent pr-12 pl-4 text-base font-bold text-white outline-none placeholder:text-white/35"
               />
             </Field>
           )}
 
-          {isLogin && (
+          {mode === 'login' && (
             <div className="text-left">
               <button
                 type="button"
-                className="touch-manipulation rounded-lg px-1 py-2 text-sm font-bold text-yellow-400 active:bg-white/5"
+                onClick={() =>
+                  changeMode('forgot')
+                }
+                className="min-h-11 touch-manipulation rounded-lg px-1 py-2 text-sm font-bold text-yellow-400"
               >
                 نسيت كلمة المرور؟
               </button>
@@ -353,7 +523,7 @@ export default function Login({
           <button
             type="submit"
             disabled={loading}
-            className="flex h-14 w-full touch-manipulation items-center justify-center gap-3 rounded-2xl bg-yellow-400 text-lg font-black text-[#321064] shadow-[0_5px_0_#8A6400] active:translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
+            className="flex h-14 w-full touch-manipulation items-center justify-center gap-3 rounded-2xl bg-yellow-400 text-lg font-black text-[#321064] shadow-[0_5px_0_#8A6400] active:translate-y-0.5 disabled:opacity-60"
           >
             {loading ? (
               <>
@@ -362,33 +532,51 @@ export default function Login({
               </>
             ) : (
               <>
-                {isLogin
+                {mode === 'login'
                   ? 'تسجيل الدخول'
-                  : 'إنشاء الحساب'}
+                  : mode === 'register'
+                    ? 'إنشاء الحساب'
+                    : mode === 'forgot'
+                      ? 'إرسال رابط الاستعادة'
+                      : 'حفظ كلمة المرور'}
+
                 <ArrowRight className="h-5 w-5" />
               </>
             )}
           </button>
         </form>
 
-        <div className="mt-6 border-t border-white/10 pt-5 text-center">
-          <p className="text-sm text-white/55">
-            {isLogin
-              ? 'ليس لديك حساب؟'
-              : 'لديك حساب بالفعل؟'}
-          </p>
+        {mode !== 'reset' && (
+          <div className="mt-6 border-t border-white/10 pt-5 text-center">
+            {mode === 'login' ? (
+              <>
+                <p className="text-sm text-white/55">
+                  ليس لديك حساب؟
+                </p>
 
-          <button
-            type="button"
-            onClick={toggleMode}
-            disabled={loading}
-            className="mt-1 min-h-11 touch-manipulation rounded-xl px-4 font-black text-yellow-400 active:bg-white/5 disabled:opacity-50"
-          >
-            {isLogin
-              ? 'إنشاء حساب جديد'
-              : 'تسجيل الدخول'}
-          </button>
-        </div>
+                <button
+                  type="button"
+                  onClick={() =>
+                    changeMode('register')
+                  }
+                  className="mt-1 min-h-11 rounded-xl px-4 font-black text-yellow-400"
+                >
+                  إنشاء حساب جديد
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                onClick={() =>
+                  changeMode('login')
+                }
+                className="min-h-11 rounded-xl px-4 font-black text-yellow-400"
+              >
+                العودة إلى تسجيل الدخول
+              </button>
+            )}
+          </div>
+        )}
       </section>
     </main>
   );
